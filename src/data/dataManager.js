@@ -1,8 +1,10 @@
+import { courses as defaultCourses } from './mockData';
+
 // Data management utilities for courses
-const STORAGE_KEY = 'weekwise_courses';
+const STORAGE_KEY = 'weekwise_courses_v2';
 
 export function getCourses() {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === 'undefined') return defaultCourses;
 
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -10,8 +12,7 @@ export function getCourses() {
     }
 
     // Return default courses from mockData
-    const { courses } = require('./mockData');
-    return courses;
+    return defaultCourses;
 }
 
 export function saveCourses(courses) {

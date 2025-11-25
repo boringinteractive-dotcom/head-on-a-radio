@@ -4,20 +4,20 @@ import Link from "next/link";
 import Button from "./Button";
 
 export default function WeekTile({ week, courseSlug }) {
-    return (
-        <div className="week-tile">
-            <div className="week-info">
-                <h3 className="week-title">
-                    <span className="week-number">Week {week.weekNumber}</span> – {week.title}
-                </h3>
-                <p className="week-description">{week.description}</p>
-            </div>
-            <div className="week-action">
-                <Link href={`/course/${courseSlug}/week/${week.weekNumber}`}>
-                    <Button variant="secondary">Open Week</Button>
-                </Link>
-            </div>
-            <style jsx>{`
+  return (
+    <div className="week-tile">
+      <div className="week-info">
+        <h3 className="week-title">
+          <span className="week-number">Week {week.weekNumber}</span> – {week.title}
+        </h3>
+        <p className="week-description">{week.description}</p>
+      </div>
+      <div className="week-action">
+        <Link href={`/content/${courseSlug}/week-${week.weekNumber}/index.html`}>
+          <Button variant="secondary">Open Week</Button>
+        </Link>
+      </div>
+      <style jsx>{`
         .week-tile {
           display: flex;
           justify-content: space-between;
@@ -63,6 +63,6 @@ export default function WeekTile({ week, courseSlug }) {
           }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

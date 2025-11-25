@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Week 9 – Backtracking & Recursion | CT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* --- CSS VARIABLES & THEME SETUP --- */
+        :root {
+            /* Apple-inspired Light Theme - matching site design */
+            --primary: #0071e3;
+            --primary-rgb: 0, 113, 227;
+            --secondary: #0a84ff;
+            --bg-body: #FFFFFF;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --bg-glass: rgba(255, 255, 255, 0.72);
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --success: #34c759;
+            --danger: #ff3b30;
+            --warning: #F59E0B;
+            --code-bg: #1E293B;
+            --input-bg: #FFFFFF;
+            --viz-node: #ffffff;
+            --viz-edge: #94a3b8;
+            --viz-bg: #f8fafc;
+        }
+
+        [data-theme="dark"] {
+            --primary: #0a84ff;
+            --primary-rgb: 10, 132, 255;
+            --secondary: #409cff;
+            --bg-body: #000000;
+            --bg-card: rgba(29, 29, 31, 0.72);
+            --bg-glass: rgba(29, 29, 31, 0.72);
+            --text-main: #f5f5f7;
+            --text-sub: #86868b;
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --success: #32d74b;
+            --danger: #ff453a;
+            --warning: #FBBF24;
+            --code-bg: #020617;
+            --input-bg: #1e293b;
+            --viz-node: #1e293b;
+            --viz-edge: #475569;
+            --viz-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.7;
+            overflow-x: hidden;
+            padding-bottom: 100px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* --- LAYOUT & HEADER --- */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            z-index: 9999;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+            text-decoration: none;
+            transition: opacity 0.2s var(--ease-out);
+        }
+
+        .logo:hover {
+            opacity: 0.7;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-card);
+            transform: rotate(15deg);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 100px auto 0;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- CARDS & CONTENT --- */
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 100px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decoration for cards */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            opacity: 0.5;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--text-main);
+            margin-top: 0;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            color: var(--text-sub);
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        ul {
+            padding-left: 1.2rem;
+            color: var(--text-sub);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.9em;
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        /* --- VISUALIZATION CANVAS --- */
+        .viz-container {
+            width: 100%;
+            height: 350px;
+            background: var(--viz-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            margin: 1.5rem 0;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .viz-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--bg-card);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+            pointer-events: none;
+        }
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        .badge {
+            display: inline-flex;
+            padding: 0.3rem 0.8rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .badge.core {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+        }
+
+        .badge.quiz {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge.application {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--secondary);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.4);
+        }
+
+        .btn:hover::after {
+            opacity: 1;
+        }
+
+        .btn-soft {
+            background: var(--bg-body);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+
+        .btn-soft:hover {
+            background: var(--border);
+            color: var(--text-main);
+        }
+
+        .big-idea {
+            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.05), rgba(var(--secondary), 0.05));
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .big-idea::before {
+            content: '💡';
+            font-size: 1.5rem;
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--bg-card);
+            padding: 0 5px;
+            border-radius: 50%;
+        }
+
+        /* --- WEEK MAP CHIPS --- */
+        .week-map {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .nav-chip {
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .nav-chip span {
+            color: var(--primary);
+            font-weight: 800;
+            margin-right: 6px;
+        }
+
+        .nav-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* --- MCQs & QUIZZES --- */
+        .mcq {
+            background: var(--bg-body);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+
+        .mcq-options {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .mcq-option {
+            width: 100%;
+            text-align: left;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .mcq-option:hover {
+            border-color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .mcq-option.selected {
+            border-color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        .mcq-option.mcq-correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .mcq-option.mcq-wrong {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .mcq-option span.letter {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-right: 10px;
+        }
+
+        .mcq-feedback {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .mcq-feedback.correct {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .mcq-feedback.wrong {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- TABLES & MATRICES --- */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            font-size: 0.95rem;
+        }
+
+        /* The interactive matrix builder */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            max-width: 280px;
+            margin: 1rem auto;
+            padding: 10px;
+            background: var(--code-bg);
+            border-radius: 12px;
+        }
+
+        .matrix-cell {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            background: var(--input-bg);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .matrix-cell.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .matrix-cell:hover {
+            transform: scale(1.05);
+        }
+
+        .matrix-cell.error {
+            border-color: var(--danger);
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Input styling */
+        input[type="number"],
+        textarea,
+        select {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        input[type="number"] {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        textarea:focus,
+        input:focus,
+        select:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+
+        /* --- NOUN GRAPH TEXT HIGHLIGHT --- */
+        .noun {
+            border-radius: 4px;
+            padding: 0 2px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .noun:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+        }
+
+        .noun.active {
+            background: rgba(var(--primary-rgb), 0.2);
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 700px) {
+            .sticky-header {
+                padding: 0 1rem;
+            }
+
+            .week-title-nav {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="scroll-progress"></div>
+
+    <nav class="sticky-header">
+        <a href="/course/ct" class="logo">← Back to CT</a>
+        <div class="week-title-nav" style="font-size:0.9rem; color:var(--text-sub);">Backtracking & Recursion</div>
+        <button class="theme-toggle" id="themeBtn" aria-label="Toggle Dark Mode">🌙</button>
+    </nav>
+
+    <div class="container">
+
+        <section id="map">
+            <div class="card">
+                <h3
+                    style="text-align:center; margin-bottom:1.5rem; text-transform:uppercase; color:var(--text-sub); font-size:0.8rem; letter-spacing:0.1em;">
+                    Week Overview</h3>
+                <div class="week-map" style="justify-content:center;">
+                    <a href="#intro" class="nav-chip"><span>0</span>Intro</a>
+                    <a href="#graphs" class="nav-chip"><span>1</span>Visual Graphs</a>
+                    <a href="#matrices" class="nav-chip"><span>2</span>Matrices</a>
+                    <a href="#adjacency" class="nav-chip"><span>3</span>Adjacency</a>
+                    <a href="#similarity" class="nav-chip"><span>4</span>Cliques</a>
+                    <a href="#popular" class="nav-chip"><span>5</span>Popularity</a>
+                    <a href="#coherence" class="nav-chip"><span>6</span>Paragraphs</a>
+                    <a href="#trains" class="nav-chip"><span>7</span>Trains</a>
+                    <a href="#quiz" class="nav-chip"><span>8</span>Quiz</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="intro">
+            <div class="card">
+                <span class="badge core">Overview</span>
+                <h1>Graphs, Matrices & Networks</h1>
+                <p>
+                    This week isn't about bar charts. It's about <strong>connections</strong>.
+                    How cities link by trains, how friends link by secrets, how ideas link in a sentence.
+                </p>
+
+                <div class="viz-container" id="viz-intro">
+                    <canvas id="canvas-intro"></canvas>
+                    <div class="viz-overlay">Mouse over to disturb the network</div>
+                </div>
+
+                <h3>🎯 Learning Objectives</h3>
+                <ul>
+                    <li>Explain what a <strong>graph</strong> is (nodes + edges).</li>
+                    <li>Represent a graph as an <strong>adjacency matrix</strong> (the code version).</li>
+                    <li>Find <strong>cliques</strong> (tight friend groups) and <strong>popular nodes</strong>.</li>
+                    <li>Model real world problems: <strong>Train Routes</strong> and <strong>Text Coherence</strong>.
+                    </li>
+                </ul>
+
+                <div class="big-idea">
+                    <strong>Pre-flight Check:</strong> Do you know what a List `[0,1,2]` and a Dictionary `{key: value}`
+                    are? You'll need them.
+                </div>
+            </div>
+
+            <div class="card">
+                <span class="badge quiz">Warm Up</span>
+                <h2>Knowledge Check</h2>
+
+                <div class="mcq" data-correct-msg="Spot on! Dictionaries allow instant access via keys.">
+                    <div class="mcq-header"><strong>Q1.</strong> What is the superpower of a dictionary vs a list?</div>
+                    <div class="mcq-options">
+                        <button class="mcq-option" onclick="handleMCQ(this)"><span class="letter">A</span>It keeps items
+                            sorted.</button>
+                        <button class="mcq-option" data-correct="true" onclick="handleMCQ(this)"><span
+                                class="letter">B</span>Fast access by <strong>key</strong>, not just index.</button>
+                        <button class="mcq-option" onclick="handleMCQ(this)"><span class="letter">C</span>It only stores
+                            numbers.</button>
+                    </div>
+                    <div class="mcq-feedback"></div>
+                </div>
+
+                <div class="mcq" data-correct-msg="Exactly. Things (cities) + Connections (lines) = Graph.">
+                    <div class="mcq-header"><strong>Q2.</strong> Which of these feels most like a
+                        <strong>Graph</strong>?
+                    </div>
+                    <div class="mcq-options">
+                        <button class="mcq-option" onclick="handleMCQ(this)"><span class="letter">A</span>A shopping
+                            list.</button>
+                        <button class="mcq-option" data-correct="true" onclick="handleMCQ(this)"><span
+                                class="letter">B</span>A map of metro stations and tracks.</button>
+                        <button class="mcq-option" onclick="handleMCQ(this)"><span class="letter">C</span>A table of
+                            multiplication.</button>
+                    </div>
+                    <div class="mcq-feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="graphs">
+            <div class="card">
+                <span class="badge core">Concept 1</span>
+                <h2>The Study-Help Graph</h2>
+                <p>Imagine 5 students. Some are strong in subjects and can mentor others.</p>
+                <div class="big-idea">
+                    <strong>Graph Anatomy:</strong>
+                    <br>• <strong>Nodes</strong> (Vertices): The things (Students).
+                    <br>• <strong>Edges</strong>: The connections (Mentorship).
+                    <br>• <strong>Directed</strong>: A → B means A helps B (Direction matters!).
+                </div>
+
+                <div class="viz-container" style="height: 400px;">
+                    <canvas id="canvas-study"></canvas>
+                    <div class="viz-overlay">Drag the students around!</div>
+                </div>
+                <p style="text-align:center; font-size:0.9rem; color:var(--text-sub);">
+                    <em>Visualized above: Ananya, Bharat, Chitra, Dev, Esha. <br>Arrows show who can mentor whom based
+                        on marks.</em>
+                </p>
+
+                <div class="card" style="background: var(--bg-body); border:none; margin-top:1rem;">
+                    <h3>🎯 Challenge: Who helps Dev?</h3>
+                    <p>Dev has lower marks. Based on the logic (Mentor must be +10 marks higher), check who can help
+                        him.</p>
+
+                    <table class="dev-mentor-table">
+                        <thead>
+                            <tr>
+                                <th>Potential Mentor</th>
+                                <th>Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-student="Ananya">
+                                <td>Ananya</td>
+                                <td><label><input type="radio" name="d-a" value="yes"> Yes</label> <label><input
+                                            type="radio" name="d-a" value="no"> No</label></td>
+                            </tr>
+                            <tr data-student="Bharat">
+                                <td>Bharat</td>
+                                <td><label><input type="radio" name="d-b" value="yes"> Yes</label> <label><input
+                                            type="radio" name="d-b" value="no"> No</label></td>
+                            </tr>
+                            <tr data-student="Chitra">
+                                <td>Chitra</td>
+                                <td><label><input type="radio" name="d-c" value="yes"> Yes</label> <label><input
+                                            type="radio" name="d-c" value="no"> No</label></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-soft" onclick="checkDevMentors()">Check Mentors</button>
+                    <div id="dev-feedback" class="mcq-feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="matrices">
+            <div class="card">
+                <span class="badge core">Concept 2</span>
+                <h2>Matrices (The Digital Grid)</h2>
+                <p>Computers don't "see" drawings. They like numbers. A <strong>Matrix</strong> is a 2D grid of numbers.
+                </p>
+
+                <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap; margin:2rem 0;">
+                    <div style="background:var(--code-bg); padding:1rem; border-radius:12px; color:var(--text-main);">
+                        <div style="text-align:center; margin-bottom:0.5rem; font-size:0.8rem; color:var(--text-sub);">
+                            Visual Matrix</div>
+                        <table class="matrix-display" style="width:auto; margin:0;">
+                            <tr>
+                                <td>5</td>
+                                <td>0</td>
+                                <td>9</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>3</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>4</td>
+                                <td>2</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="flex:1; min-width:200px;">
+                        <p><strong>Coordinates:</strong> <code>M[row][col]</code></p>
+                        <ul>
+                            <li><code>M[0][2]</code> is Row 0, Col 2 -> <strong>9</strong></li>
+                            <li><code>M[1][0]</code> is Row 1, Col 0 -> <strong>7</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mcq" data-correct-msg="Perfect. Row 2, Col 2 is the bottom right.">
+                    <div class="mcq-header"><strong>Quick Check:</strong> What is <code>M[2][2]</code> in the grid
+                        above?</div>
+                    <div class="mcq-options">
+                        <button class="mcq-option" onclick="handleMCQ(this)">5</button>
+                        <button class="mcq-option" data-correct="true" onclick="handleMCQ(this)">2</button>
+                        <button class="mcq-option" onclick="handleMCQ(this)">4</button>
+                    </div>
+                    <div class="mcq-feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="adjacency">
+            <div class="card">
+                <span class="badge core">Concept 3</span>
+                <h2>Adjacency Matrices</h2>
+                <p>How do we store a Graph in a Matrix? Simple.</p>
+                <div class="big-idea">
+                    If <code>Node i</code> connects to <code>Node j</code>, set <code>Matrix[i][j] = 1</code>.<br>
+                    Otherwise, set it to <code>0</code>.
+                </div>
+
+                <h3>🎮 Interactive Builder</h3>
+                <p>Below is a visual graph (left) and its matrix (right). <strong>Click the matrix cells</strong> to
+                    create/destroy edges instantly!</p>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; align-items:center;">
+                    <div class="viz-container" style="height:300px; margin:0;">
+                        <canvas id="canvas-adj"></canvas>
+                    </div>
+
+                    <div>
+                        <div class="matrix-grid" id="adj-matrix-grid">
+                        </div>
+                        <div style="text-align:center; font-size:0.8rem; color:var(--text-sub);">
+                            Row = FROM node<br>Column = TO node
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card"
+                    style="margin-top:1rem; border:1px dashed var(--primary); background:rgba(var(--primary-rgb),0.05);">
+                    <p><strong>Try this:</strong> Make a loop where 0→1, 1→2, 2→3, and 3→0.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="similarity">
+            <div class="card">
+                <span class="badge core">Concept 4</span>
+                <h2>Cliques & Similarity</h2>
+                <p>Sometimes edges mean "is similar to". If everyone in a group is connected to everyone else, that's a
+                    <strong>Clique</strong>.
+                </p>
+
+                <div class="viz-container" style="height:300px;">
+                    <canvas id="canvas-clique"></canvas>
+                    <div class="viz-overlay" id="clique-status">Select nodes below to highlight</div>
+                </div>
+
+                <div class="mcq" style="background:var(--bg-body);">
+                    <div class="mcq-header">Select nodes to form a clique:</div>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;">
+                        <button class="btn btn-soft clique-toggle" onclick="toggleCliqueNode(0)">Ananya</button>
+                        <button class="btn btn-soft clique-toggle" onclick="toggleCliqueNode(1)">Bharat</button>
+                        <button class="btn btn-soft clique-toggle" onclick="toggleCliqueNode(2)">Chitra</button>
+                        <button class="btn btn-soft clique-toggle" onclick="toggleCliqueNode(3)">Dev</button>
+                        <button class="btn btn-soft clique-toggle" onclick="toggleCliqueNode(4)">Esha</button>
+                    </div>
+                    <button class="btn" style="margin-top:1rem;" onclick="checkCliqueBtn()">Check for Clique</button>
+                    <div id="clique-feedback-text" class="mcq-feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="popular">
+            <div class="card">
+                <span class="badge core">Concept 5</span>
+                <h2>Popularity Contest</h2>
+                <p>In a directed graph (like Twitter/X), popularity is math.</p>
+                <ul>
+                    <li><strong>In-degree:</strong> How many follow you (arrows in).</li>
+                    <li><strong>Out-degree:</strong> How many you follow (arrows out).</li>
+                </ul>
+
+                <div class="viz-container" style="height:250px;">
+                    <canvas id="canvas-pop"></canvas>
+                </div>
+
+                <table class="table" id="pop-table">
+                    <thead>
+                        <tr>
+                            <th>Node</th>
+                            <th>In-Degree</th>
+                            <th>Out-Degree</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-node="Chetan">
+                            <td><strong>Chetan</strong> (Middle Node)</td>
+                            <td><input type="number" placeholder="?" id="in-chetan"></td>
+                            <td><input type="number" placeholder="?" id="out-chetan"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="btn btn-soft" onclick="checkPopularity()">Check Values</button>
+                <div id="pop-feedback" class="mcq-feedback"></div>
+            </div>
+        </section>
+
+        <section id="coherence">
+            <div class="card">
+                <span class="badge application">Application</span>
+                <h2>Paragraph Coherence</h2>
+                <p>Graphs can analyze writing. Nodes are <strong>Nouns</strong>. Edges connect nouns in the same
+                    sentence.</p>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div class="card" style="margin:0; background:var(--bg-body);">
+                        <h3>Paragraph A (Coherent)</h3>
+                        <p style="font-size:0.9rem;">
+                            <span class="noun noun-a">Swami</span> woke up. The <span class="noun noun-a">school</span>
+                            <span class="noun noun-a">headmaster</span> was strict. <span
+                                class="noun noun-a">Swami</span> ran to <span class="noun noun-a">school</span>.
+                        </p>
+                        <button class="btn-soft" style="font-size:0.8rem; padding:0.4rem;"
+                            onclick="toggleNouns('a')">Highlight Nouns</button>
+                        <div id="graph-a-res"
+                            style="margin-top:10px; font-size:0.8rem; color:var(--success); display:none;">Result: One
+                            big connected graph!</div>
+                    </div>
+                    <div class="card" style="margin:0; background:var(--bg-body);">
+                        <h3>Paragraph B (Disjoint)</h3>
+                        <p style="font-size:0.9rem;">
+                            The <span class="noun noun-b">train</span> was late. <span class="noun noun-b">Blue
+                                Whales</span> are big. I like <span class="noun noun-b">ice cream</span>.
+                        </p>
+                        <button class="btn-soft" style="font-size:0.8rem; padding:0.4rem;"
+                            onclick="toggleNouns('b')">Highlight Nouns</button>
+                        <div id="graph-b-res"
+                            style="margin-top:10px; font-size:0.8rem; color:var(--danger); display:none;">Result: Many
+                            tiny disconnected islands.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="trains">
+            <div class="card">
+                <span class="badge application">Application</span>
+                <h2>Train Networks (Pathfinding)</h2>
+                <p>Finding the shortest route is a classic graph problem (BFS).</p>
+
+                <div class="viz-container" style="height:350px;">
+                    <canvas id="canvas-train"></canvas>
+                </div>
+
+                <div style="display:flex; gap:1rem; align-items:end;">
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem;">Start City</label>
+                        <select id="start-city">
+                            <option value="C">Chennai (C)</option>
+                            <option value="B">Bangalore (B)</option>
+                            <option value="H">Hyderabad (H)</option>
+                            <option value="M">Mumbai (M)</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem;">Destination</label>
+                        <select id="end-city">
+                            <option value="C">Chennai (C)</option>
+                            <option value="B">Bangalore (B)</option>
+                            <option value="H">Hyderabad (H)</option>
+                            <option value="M" selected>Mumbai (M)</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="findRoute()">Find Route 🚂</button>
+                </div>
+                <div id="route-feedback" class="mcq-feedback"></div>
+            </div>
+        </section>
+
+        <section id="quiz">
+            <div class="card">
+                <span class="badge quiz">Final Boss</span>
+                <h2>End-of-Week Quiz</h2>
+                <p>Test your neural network (brain).</p>
+
+                <div class="mcq-container">
+                    <div class="mcq" data-final="true">
+                        <div class="mcq-header">1. In a directed graph, does A → B imply B → A?</div>
+                        <div class="mcq-options">
+                            <button class="mcq-option" onclick="selectQuiz(this)">Yes, always.</button>
+                            <button class="mcq-option" data-correct="true" onclick="selectQuiz(this)">No, edges have
+                                direction.</button>
+                        </div>
+                    </div>
+
+                    <div class="mcq" data-final="true">
+                        <div class="mcq-header">2. A matrix with 5 rows and 5 columns has how many cells?</div>
+                        <div class="mcq-options">
+                            <button class="mcq-option" onclick="selectQuiz(this)">10</button>
+                            <button class="mcq-option" data-correct="true" onclick="selectQuiz(this)">25</button>
+                            <button class="mcq-option" onclick="selectQuiz(this)">5</button>
+                        </div>
+                    </div>
+
+                    <div class="mcq" data-final="true">
+                        <div class="mcq-header">3. What represents a "tightly knit friend group"?</div>
+                        <div class="mcq-options">
+                            <button class="mcq-option" onclick="selectQuiz(this)">A Tree</button>
+                            <button class="mcq-option" onclick="selectQuiz(this)">A Path</button>
+                            <button class="mcq-option" data-correct="true" onclick="selectQuiz(this)">A Clique</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" style="width:100%; margin-top:1rem;" onclick="gradeFinal()">Submit Quiz</button>
+                <div id="final-score" style="text-align:center; margin-top:1rem; font-weight:800; font-size:1.5rem;">
+                </div>
+            </div>
+        </section>
+
+        <div style="height:100px;"></div>
+    </div>
+
+    <script>
+        /* --- THEME TOGGLE --- */
+        const themeBtn = document.getElementById('themeBtn');
+        const html = document.documentElement;
+
+        // Sync theme with main site on load
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            html.setAttribute('data-theme', savedTheme);
+            themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        initTheme();
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next); // Persist theme choice
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+            redrawAllCanvases();
+        });
+
+        /* --- SCROLL PROGRESS --- */
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('scroll-progress').style.width = scrolled + "%";
+        });
+
+        /* --- CANVAS GRAPH ENGINE --- */
+        class GraphVis {
+            constructor(canvasId, type, data) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.nodes = data.nodes || [];
+                this.edges = data.edges || [];
+                this.type = type; // 'directed', 'undirected', 'particles'
+                this.resize();
+
+                // Interaction state
+                this.draggedNode = null;
+                this.hoverNode = null;
+
+                // Event Listeners
+                this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                window.addEventListener('resize', this.resize.bind(this));
+
+                // Animation Loop
+                this.animate();
+            }
+
+            resize() {
+                const parent = this.canvas.parentElement;
+                this.canvas.width = parent.clientWidth;
+                this.canvas.height = parent.clientHeight;
+            }
+
+            getStyle(prop) {
+                return getComputedStyle(document.documentElement).getPropertyValue(prop).trim();
+            }
+
+            draw() {
+                const ctx = this.ctx;
+                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                const colorNode = this.getStyle('--viz-node');
+                const colorEdge = this.getStyle('--viz-edge');
+                const colorPrimary = this.getStyle('--primary');
+
+                // Draw Edges
+                ctx.strokeStyle = colorEdge;
+                ctx.lineWidth = 2;
+                this.edges.forEach(edge => {
+                    const start = this.nodes[edge.from];
+                    const end = this.nodes[edge.to];
+
+                    ctx.beginPath();
+                    ctx.moveTo(start.x, start.y);
+                    ctx.lineTo(end.x, end.y);
+                    ctx.stroke();
+
+                    if (this.type === 'directed') {
+                        // Draw Arrowhead
+                        const angle = Math.atan2(end.y - start.y, end.x - start.x);
+                        ctx.beginPath();
+                        ctx.moveTo(end.x - 15 * Math.cos(angle - Math.PI / 6), end.y - 15 * Math.sin(angle - Math.PI / 6));
+                        ctx.lineTo(end.x, end.y);
+                        ctx.lineTo(end.x - 15 * Math.cos(angle + Math.PI / 6), end.y - 15 * Math.sin(angle + Math.PI / 6));
+                        ctx.fillStyle = colorEdge;
+                        ctx.fill();
+                    }
+                });
+
+                // Draw Nodes
+                this.nodes.forEach(node => {
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.r || 20, 0, Math.PI * 2);
+                    ctx.fillStyle = node.highlight ? colorPrimary : colorNode;
+                    ctx.fill();
+                    ctx.strokeStyle = colorEdge;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Label
+                    if (node.label) {
+                        ctx.fillStyle = this.getStyle('--text-main');
+                        ctx.font = 'bold 12px Inter';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(node.label, node.x, node.y);
+                    }
+                });
+
+                // Train Animation (if active)
+                if (this.trainAnim) {
+                    const { path, t } = this.trainAnim;
+                    // Interpolate position
+                    const totalSegs = path.length - 1;
+                    const progress = t * totalSegs;
+                    const currentSeg = Math.floor(progress);
+                    const segT = progress - currentSeg;
+
+                    if (currentSeg < totalSegs) {
+                        const n1 = this.nodes[path[currentSeg]];
+                        const n2 = this.nodes[path[currentSeg + 1]];
+                        const tx = n1.x + (n2.x - n1.x) * segT;
+                        const ty = n1.y + (n2.y - n1.y) * segT;
+
+                        ctx.beginPath();
+                        ctx.arc(tx, ty, 8, 0, Math.PI * 2);
+                        ctx.fillStyle = '#F59E0B';
+                        ctx.fill();
+
+                        this.trainAnim.t += 0.01;
+                        if (this.trainAnim.t > 1) this.trainAnim = null;
+                    }
+                }
+            }
+
+            animate() {
+                // Intro Particle Logic
+                if (this.type === 'particles') {
+                    this.nodes.forEach(n => {
+                        n.x += n.vx; n.y += n.vy;
+                        if (n.x < 0 || n.x > this.canvas.width) n.vx *= -1;
+                        if (n.y < 0 || n.y > this.canvas.height) n.vy *= -1;
+                    });
+                }
+                this.draw();
+                requestAnimationFrame(this.animate.bind(this));
+            }
+
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                if (this.draggedNode) {
+                    this.draggedNode.x = mx;
+                    this.draggedNode.y = my;
+                    return;
+                }
+
+                // Hover logic
+                let hit = false;
+                this.nodes.forEach(n => {
+                    const dist = Math.hypot(mx - n.x, my - n.y);
+                    if (dist < (n.r || 20)) {
+                        this.canvas.style.cursor = 'pointer';
+                        hit = true;
+                    }
+                });
+                if (!hit) this.canvas.style.cursor = 'default';
+            }
+
+            handleMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                this.nodes.forEach(n => {
+                    const dist = Math.hypot(mx - n.x, my - n.y);
+                    if (dist < (n.r || 20)) {
+                        this.draggedNode = n;
+                    }
+                });
+            }
+
+            handleMouseUp() {
+                this.draggedNode = null;
+            }
+
+            toggleEdge(from, to) {
+                const existingIdx = this.edges.findIndex(e => e.from === from && e.to === to);
+                if (existingIdx >= 0) {
+                    this.edges.splice(existingIdx, 1);
+                } else {
+                    this.edges.push({ from, to });
+                }
+            }
+        }
+
+        /* --- INIT VISUALIZATIONS --- */
+        let vizIntro, vizStudy, vizAdj, vizClique, vizPop, vizTrain;
+
+        function initVisuals() {
+            // 1. Intro Particles
+            const particles = [];
+            for (let i = 0; i < 15; i++) {
+                particles.push({
+                    x: Math.random() * 800, y: Math.random() * 300,
+                    vx: (Math.random() - 0.5), vy: (Math.random() - 0.5),
+                    r: 4
+                });
+            }
+            // Connect nearby particles
+            vizIntro = new GraphVis('canvas-intro', 'particles', { nodes: particles, edges: [] });
+            vizIntro.draw = function () {
+                const ctx = this.ctx;
+                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                const color = this.getStyle('--primary');
+
+                // Connect logic
+                ctx.strokeStyle = "rgba(100,100,100,0.2)";
+                for (let i = 0; i < this.nodes.length; i++) {
+                    for (let j = i + 1; j < this.nodes.length; j++) {
+                        const d = Math.hypot(this.nodes[i].x - this.nodes[j].x, this.nodes[i].y - this.nodes[j].y);
+                        if (d < 100) {
+                            ctx.beginPath(); ctx.moveTo(this.nodes[i].x, this.nodes[i].y); ctx.lineTo(this.nodes[j].x, this.nodes[j].y); ctx.stroke();
+                        }
+                    }
+                }
+
+                this.nodes.forEach(n => {
+                    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                    ctx.fillStyle = color; ctx.fill();
+                });
+            }
+
+            // 2. Study Graph
+            const studyNodes = [
+                { x: 100, y: 100, label: 'Ananya' }, { x: 300, y: 50, label: 'Bharat' },
+                { x: 500, y: 100, label: 'Chitra' }, { x: 200, y: 250, label: 'Dev' },
+                { x: 400, y: 250, label: 'Esha' }
+            ];
+            // Logic: Ananya helps everyone, Chitra helps everyone... (Simplified for visual)
+            const studyEdges = [
+                { from: 0, to: 1 }, { from: 0, to: 3 }, { from: 2, to: 0 }, { from: 2, to: 4 }, { from: 1, to: 3 }
+            ];
+            vizStudy = new GraphVis('canvas-study', 'directed', { nodes: studyNodes, edges: studyEdges });
+
+            // 3. Adj Matrix Graph (4 Nodes)
+            const adjNodes = [
+                { x: 80, y: 80, label: '0' }, { x: 220, y: 80, label: '1' },
+                { x: 220, y: 220, label: '2' }, { x: 80, y: 220, label: '3' }
+            ];
+            vizAdj = new GraphVis('canvas-adj', 'directed', { nodes: adjNodes, edges: [] });
+            buildMatrixGrid();
+
+            // 4. Clique Graph
+            const cliqueNodes = [
+                { x: 150, y: 60, label: 'A', id: 0 }, { x: 250, y: 120, label: 'B', id: 1 },
+                { x: 200, y: 220, label: 'C', id: 2 }, { x: 80, y: 180, label: 'D', id: 3 },
+                { x: 50, y: 100, label: 'E', id: 4 }
+            ];
+            const cliqueEdges = [
+                { from: 0, to: 2 }, { from: 0, to: 4 }, { from: 2, to: 4 }, // A-C-E clique
+                { from: 1, to: 3 }, { from: 1, to: 4 }
+            ];
+            vizClique = new GraphVis('canvas-clique', 'undirected', { nodes: cliqueNodes, edges: cliqueEdges });
+
+            // 5. Popularity Graph
+            const popNodes = [
+                { x: 100, y: 50, label: 'A' }, { x: 100, y: 200, label: 'B' },
+                { x: 250, y: 125, label: 'Chetan' }, // Center
+                { x: 400, y: 50, label: 'D' }, { x: 400, y: 200, label: 'F' }
+            ];
+            const popEdges = [
+                { from: 0, to: 2 }, { from: 1, to: 2 }, { from: 3, to: 2 }, { from: 4, to: 2 }, // In to Chetan
+                { from: 2, to: 0 }, { from: 2, to: 3 } // Out from Chetan
+            ];
+            vizPop = new GraphVis('canvas-pop', 'directed', { nodes: popNodes, edges: popEdges });
+
+            // 6. Train Graph
+            const trainNodes = [
+                { x: 50, y: 150, label: 'M' }, { x: 150, y: 50, label: 'N' },
+                { x: 150, y: 250, label: 'P' }, { x: 300, y: 150, label: 'H' },
+                { x: 450, y: 80, label: 'B' }, { x: 450, y: 220, label: 'C' }
+            ];
+            const trainEdges = [
+                { from: 0, to: 1 }, { from: 0, to: 2 }, // M-N, M-P
+                { from: 1, to: 3 }, // N-H
+                { from: 2, to: 4 }, // P-B
+                { from: 3, to: 4 }, { from: 3, to: 5 }, // H-B, H-C
+                { from: 4, to: 5 } // B-C
+            ];
+            vizTrain = new GraphVis('canvas-train', 'undirected', { nodes: trainNodes, edges: trainEdges });
+        }
+
+        function redrawAllCanvases() {
+            // Hack to refresh colors on theme switch
+            if (vizIntro) vizIntro.draw();
+            if (vizStudy) vizStudy.draw();
+            if (vizAdj) vizAdj.draw();
+            if (vizClique) vizClique.draw();
+            if (vizPop) vizPop.draw();
+            if (vizTrain) vizTrain.draw();
+        }
+
+        window.onload = initVisuals;
+
+        /* --- LOGIC HANDLERS --- */
+
+        // 1. Matrix Builder Logic
+        function buildMatrixGrid() {
+            const container = document.getElementById('adj-matrix-grid');
+            container.innerHTML = '';
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.textContent = '0';
+                    cell.dataset.r = r; cell.dataset.c = c;
+                    cell.onclick = () => {
+                        const val = cell.textContent === '0' ? '1' : '0';
+                        cell.textContent = val;
+                        cell.classList.toggle('active');
+                        vizAdj.toggleEdge(r, c); // Sync Visual
+                    };
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        // 2. Clique Logic
+        const selectedCliqueNodes = new Set();
+        function toggleCliqueNode(id) {
+            const btns = document.querySelectorAll('.clique-toggle');
+            const btn = btns[id];
+
+            if (selectedCliqueNodes.has(id)) {
+                selectedCliqueNodes.delete(id);
+                btn.classList.remove('btn');
+                btn.classList.add('btn-soft');
+                vizClique.nodes[id].highlight = false;
+            } else {
+                selectedCliqueNodes.add(id);
+                btn.classList.remove('btn-soft');
+                btn.classList.add('btn');
+                vizClique.nodes[id].highlight = true;
+            }
+        }
+
+        function checkCliqueBtn() {
+            const arr = Array.from(selectedCliqueNodes).sort().join('');
+            const feedback = document.getElementById('clique-feedback-text');
+            feedback.style.display = 'block';
+
+            // Looking for A, C, E (Indices 0, 2, 4)
+            if (arr === '024') {
+                feedback.className = 'mcq-feedback correct';
+                feedback.textContent = 'Correct! A, C, and E are all connected to each other.';
+            } else {
+                feedback.className = 'mcq-feedback wrong';
+                feedback.textContent = 'Not quite. Check the lines in the graph. Everyone in the group must connect to everyone else.';
+            }
+        }
+
+        // 3. Dev Mentors
+        function checkDevMentors() {
+            const correct = { 'd-a': 'yes', 'd-b': 'yes', 'd-c': 'yes' };
+            let score = 0;
+            for (const [name, val] of Object.entries(correct)) {
+                const el = document.querySelector(`input[name="${name}"]:checked`);
+                if (el && el.value === val) score++;
+            }
+            const fb = document.getElementById('dev-feedback');
+            fb.style.display = 'block';
+            if (score === 3) {
+                fb.className = 'mcq-feedback correct';
+                fb.textContent = 'Correct! All of them have significantly higher marks.';
+            } else {
+                fb.className = 'mcq-feedback wrong';
+                fb.textContent = 'Check again. Remember the +10 marks rule.';
+            }
+        }
+
+        // 4. Popularity
+        function checkPopularity() {
+            const i = document.getElementById('in-chetan').value;
+            const o = document.getElementById('out-chetan').value;
+            const fb = document.getElementById('pop-feedback');
+            fb.style.display = 'block';
+
+            if (i == '4' && o == '2') {
+                fb.className = 'mcq-feedback correct';
+                fb.textContent = 'Spot on! 4 arrows in, 2 arrows out.';
+            } else {
+                fb.className = 'mcq-feedback wrong';
+                fb.textContent = 'Count the arrow heads pointing TO Chetan (In) vs FROM Chetan (Out).';
+            }
+        }
+
+        // 5. Nouns
+        function toggleNouns(group) {
+            const nouns = document.querySelectorAll('.noun-' + group);
+            nouns.forEach(n => n.classList.toggle('active'));
+            document.getElementById('graph-' + group + '-res').style.display = 'block';
+        }
+
+        // 6. Train Routing
+        function findRoute() {
+            const start = document.getElementById('start-city').value;
+            const end = document.getElementById('end-city').value;
+            const fb = document.getElementById('route-feedback');
+            fb.style.display = 'block';
+
+            // Map values to indices for viz: M=0, N=1, P=2, H=3, B=4, C=5
+            const mapIdx = { M: 0, N: 1, P: 2, H: 3, B: 4, C: 5 };
+            const sI = mapIdx[start];
+            const eI = mapIdx[end];
+
+            if (start === end) {
+                fb.className = 'mcq-feedback wrong';
+                fb.textContent = 'You are already there!';
+                return;
+            }
+
+            // Simple BFS for shortest path animation
+            const queue = [[sI]];
+            const visited = new Set([sI]);
+            let pathFound = null;
+
+            // Graph adjacency list for indices
+            const adj = {
+                0: [1, 2], 1: [0, 3], 2: [0, 4], 3: [1, 4, 5], 4: [2, 3, 5], 5: [3, 4]
+            };
+
+            while (queue.length > 0) {
+                const path = queue.shift();
+                const node = path[path.length - 1];
+                if (node === eI) { pathFound = path; break; }
+
+                for (let neighbor of adj[node]) {
+                    if (!visited.has(neighbor)) {
+                        visited.add(neighbor);
+                        queue.push([...path, neighbor]);
+                    }
+                }
+            }
+
+            if (pathFound) {
+                fb.className = 'mcq-feedback correct';
+                fb.textContent = `Path found! Hops: ${pathFound.length - 1}. Watch the train go!`;
+                // Trigger animation
+                vizTrain.trainAnim = { path: pathFound, t: 0 };
+            } else {
+                fb.className = 'mcq-feedback wrong';
+                fb.textContent = 'No path found.';
+            }
+        }
+
+        /* --- GENERAL MCQ HANDLER --- */
+        function handleMCQ(btn) {
+            const parent = btn.parentElement.parentElement;
+            const feedback = parent.querySelector('.mcq-feedback');
+            const isCorrect = btn.hasAttribute('data-correct');
+
+            parent.querySelectorAll('.mcq-option').forEach(b => {
+                b.classList.remove('selected', 'mcq-correct', 'mcq-wrong');
+            });
+
+            if (isCorrect) {
+                btn.classList.add('mcq-correct');
+                feedback.textContent = parent.dataset.correctMsg || "Correct!";
+                feedback.className = 'mcq-feedback correct';
+            } else {
+                btn.classList.add('mcq-wrong');
+                feedback.textContent = "Not quite.";
+                feedback.className = 'mcq-feedback wrong';
+            }
+            feedback.style.display = 'block';
+        }
+
+        function selectQuiz(btn) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.mcq-option').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        function gradeFinal() {
+            const q = document.querySelectorAll('.mcq[data-final="true"]');
+            let score = 0;
+            q.forEach(el => {
+                const sel = el.querySelector('.selected');
+                if (sel && sel.hasAttribute('data-correct')) score++;
+            });
+            const res = document.getElementById('final-score');
+            res.textContent = `You scored ${score} / ${q.length}`;
+            if (score === q.length) res.style.color = "var(--success)";
+            else res.style.color = "var(--warning)";
+        }
+    </script>
+
+</body>
+
+</html>

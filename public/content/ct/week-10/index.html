@@ -1,33 +1,2848 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
+    <title>Week 10 – Trains, Graphs & Shortest Route | CT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Content Coming Soon</title>
     <style>
         :root {
-            --bg-color: #FFFFFF;
-            --text-primary: #1d1d1f;
-            --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            /* Apple-inspired Light Theme */
+            --bg: #FFFFFF;
+            --card: rgba(255, 255, 255, 0.8);
+            --accent: #0071e3;
+            --accent-soft: rgba(0, 113, 227, 0.1);
+            --accent-strong: #0077ED;
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --success: #34c759;
+            --success-bg: rgba(52, 199, 89, 0.1);
+            --danger: #ff3b30;
+            --danger-bg: rgba(255, 59, 48, 0.1);
+            --warning: #F59E0B;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --border: rgba(0, 0, 0, 0.1);
+            --code-bg: #1E293B;
+            --code-text: #E5E7EB;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.72);
         }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-sans);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+
+        [data-theme="dark"] {
+            --bg: #000000;
+            --card: rgba(29, 29, 31, 0.72);
+            --accent: #0a84ff;
+            --accent-soft: rgba(10, 132, 255, 0.15);
+            --accent-strong: #409cff;
+            --text-main: #f5f5f7;
+            --text-sub: #86868b;
+            --success: #32d74b;
+            --success-bg: rgba(50, 215, 75, 0.15);
+            --danger: #ff453a;
+            --danger-bg: rgba(255, 69, 58, 0.15);
+            --warning: #FBBF24;
+            --warning-bg: rgba(251, 191, 36, 0.15);
+            --border: rgba(255, 255, 255, 0.1);
+            --code-bg: #020617;
+            --code-text: #f5f5f7;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --glass-bg: rgba(29, 29, 31, 0.72);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 80px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top nav + progress */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-left {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-left:hover {
+            opacity: 0.7;
+        }
+
+        .nav-center {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-sub);
             text-align: center;
         }
-        h1 {
-            font-size: 2rem;
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--card);
+            transform: rotate(15deg);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .nav-links a {
+            font-size: 0.8rem;
+            text-decoration: none;
+            color: var(--text-sub);
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .progress-wrapper {
+            width: 220px;
+            max-width: 40vw;
+            margin-left: 1rem;
+        }
+
+        .progress-label {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            margin-bottom: 0.15rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            border-radius: 999px;
+            background: var(--border);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-text {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            margin-top: 0.2rem;
+        }
+
+        /* Layout */
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 1.25rem 3rem;
+        }
+
+        section {
+            margin-top: 2.5rem;
+            scroll-margin-top: 90px;
+        }
+
+        .card {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 18px;
+            padding: 1.6rem 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card+.card {
+            margin-top: 1.25rem;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(0, 113, 227, 0.2);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 3vw, 2.6rem);
+            margin: 0.6rem 0 0.3rem;
+            letter-spacing: -0.02em;
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            margin: 0 0 0.7rem;
+            letter-spacing: -0.015em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            margin: 1.1rem 0 0.4rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 0.35rem 0;
+            color: var(--text-main);
+        }
+
+        .subtext {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+        }
+
+        ul {
+            padding-left: 1.2rem;
+            margin: 0.35rem 0;
+            color: var(--text-sub);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .roadmap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .road-step {
+            background: var(--accent-soft);
+            border-radius: 12px;
+            padding: 0.7rem 0.8rem;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .road-step:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .road-step span {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: var(--accent);
+            margin-bottom: 0.2rem;
+            font-weight: 700;
+        }
+
+        .checklist {
+            background: var(--success-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 0.9rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .badge-note {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 0.3rem;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.2fr);
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 900px) {
+            .top-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-center {
+                order: 3;
+            }
+
+            .progress-wrapper {
+                order: 2;
+                margin-left: 0;
+            }
+
+            .nav-links {
+                order: 4;
+                justify-content: center;
+            }
+
+            .hero-grid,
+            .two-col {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: 980px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            background: var(--accent);
+            color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--accent-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-soft);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            padding-inline: 0;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.7rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .pill-label {
+            font-size: 0.75rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            display: inline-block;
+        }
+
+        /* Tables & matrices */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin: 0.7rem 0;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.6rem;
+            text-align: center;
+        }
+
+        th {
+            background: var(--accent-soft);
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .matrix-table {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .matrix-cell-editable {
+            cursor: pointer;
+            background: var(--bg);
+            min-width: 32px;
+            transition: all 0.2s ease;
+        }
+
+        .matrix-cell-editable:hover {
+            background: var(--accent-soft);
+        }
+
+        .matrix-cell-diag {
+            background: var(--border);
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .matrix-cell-wrong {
+            background: var(--danger-bg) !important;
+            color: var(--danger) !important;
+            border-color: var(--danger) !important;
+        }
+
+        .matrix-label {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-top: 0.2rem;
+            text-align: center;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .matrix-caption {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-bottom: 0.2rem;
+        }
+
+        .matrix-heat td {
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .reach-yes {
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .reach-no {
+            background: var(--bg);
+            color: var(--text-sub);
+        }
+
+        .reach-diag {
+            background: var(--border);
+            color: var(--text-sub);
+        }
+
+        /* MCQ */
+        .mcq {
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 0.8rem 0.9rem;
+            margin-top: 0.7rem;
+            background: var(--card);
+        }
+
+        .mcq p {
+            margin-top: 0;
+        }
+
+        .mcq-options {
+            margin-top: 0.4rem;
+        }
+
+        .mcq-options label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.45rem;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            padding: 0.5rem 0.6rem;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            transition: all 0.2s ease;
+        }
+
+        .mcq-options label:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+
+        .mcq-options input[type="radio"] {
+            margin-top: 0.12rem;
+            cursor: pointer;
+        }
+
+        .mcq-feedback {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.7rem;
+            border-radius: 8px;
+            color: var(--text-sub);
+        }
+
+        .mcq-correct {
+            background: var(--success-bg);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .mcq-incorrect {
+            background: var(--warning-bg);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        /* Graph representation */
+        .graph-card {
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+            padding: 0.8rem 0.9rem;
+            font-size: 0.85rem;
+            background: var(--card);
+        }
+
+        .station-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .station-chip {
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+
+        .edge-list {
+            font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+            font-size: 0.8rem;
+            max-height: 140px;
+            overflow: auto;
+            padding-left: 1rem;
+            margin: 0.3rem 0 0;
+        }
+
+        /* Hint / info boxes */
+        .info-box {
+            border-radius: 12px;
+            padding: 0.8rem 0.9rem;
+            font-size: 0.9rem;
+            background: var(--accent-soft);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            margin-top: 0.6rem;
+        }
+
+        .note-box {
+            border-radius: 12px;
+            padding: 0.7rem 0.8rem;
+            font-size: 0.85rem;
+            background: var(--card);
+            border-left: 3px solid var(--accent);
+            margin-top: 0.6rem;
+        }
+
+        .brain-break {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-sub);
+        }
+
+        /* Trains as nodes */
+        .train-nodes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.4rem;
+        }
+
+        .train-node {
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            background: var(--bg);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .train-node:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .train-node-active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .train-node-delayed {
+            background: var(--danger-bg);
+            border-color: var(--danger);
+            color: var(--danger);
+            position: relative;
+        }
+
+        .train-node-delayed::after {
+            content: attr(data-delay) "m";
+            position: absolute;
+            top: -6px;
+            right: -4px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.6rem;
+            padding: 0.05rem 0.25rem;
+            border-radius: 999px;
+        }
+
+        .train-details {
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+            color: var(--text-sub);
+        }
+
+        .train-route-output {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.6rem;
+            border-radius: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+
+        /* Delay sim */
+        .delay-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .delay-controls select,
+        .delay-controls input {
+            padding: 0.35rem 0.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: inherit;
+        }
+
+        /* Pseudocode */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            overflow: auto;
+            font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+            margin: 0.4rem 0 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .code-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+            display: inline-block;
+        }
+
+        .drag-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0;
+            font-size: 0.85rem;
+        }
+
+        .drag-item {
+            padding: 0.5rem 0.7rem;
+            margin-bottom: 0.3rem;
+            border-radius: 10px;
+            border: 1px dashed var(--border);
+            background: var(--bg);
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .drag-item:hover {
+            background: var(--accent-soft);
+        }
+
+        .drag-item.drag-over {
+            border-style: solid;
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .drag-item-correct {
+            border-color: var(--success);
+            background: var(--success-bg);
+        }
+
+        .drag-item-wrong {
+            border-color: var(--warning);
+            background: var(--warning-bg);
+        }
+
+        /* Inputs & textareas */
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            font-family: inherit;
+            font-size: 0.9rem;
+            padding: 0.5rem 0.7rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            width: 100%;
+            resize: vertical;
+            background: var(--bg);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: 2px solid var(--accent);
+            border-color: transparent;
+        }
+
+        textarea {
+            min-height: 70px;
+        }
+
+        .inline-input {
+            width: 120px;
+            display: inline-block;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 0.25rem;
+        }
+
+        .hint-toggle {
+            font-size: 0.8rem;
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .small-muted {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quiz-result {
+            font-size: 0.9rem;
+            margin-top: 0.6rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+        }
+
+        .quiz-good {
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .quiz-ok {
+            background: var(--warning-bg);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .quiz-bad {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid var(--danger);
         }
     </style>
 </head>
+
 <body>
-    <h1>This will be uploaded later</h1>
+    <header class="top-nav">
+        <a href="/course/ct" class="nav-left">← Back to CT</a>
+        <div class="nav-center">Week 10 – Trains, Graphs & Shortest Route</div>
+        <button class="theme-toggle" id="themeBtn" aria-label="Toggle Dark Mode">☀️</button>
+        <div class="progress-wrapper">
+            <div class="progress-label">Week 10 progress</div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-bar-fill"></div>
+            </div>
+            <div id="progress-text" class="progress-bar-text">0/4 activities done</div>
+        </div>
+        <nav class="nav-links" aria-label="Section navigation">
+            <a href="#hero">Hero</a>
+            <a href="#adjacency-section">Adjacency</a>
+            <a href="#hops-section">Hops</a>
+            <a href="#trains-section">Train Graph</a>
+            <a href="#pseudocode-section">Pseudocode</a>
+            <a href="#edges-section">Edge Labels</a>
+            <a href="#wrapup-section">Wrap-up & Quiz</a>
+        </nav>
+    </header>
+
+    <main class="page">
+        <!-- SECTION 1: HERO & ROADMAP -->
+        <section id="hero">
+            <div class="card">
+                <div class="hero-grid">
+                    <div>
+                        <span class="pill">Week 10 · Computational Thinking</span>
+                        <h1>Week 10 – Trains, Graphs &amp; The Hunt for the Shortest Route</h1>
+                        <p class="subtext">
+                            This week we turn our messy train network into clean tables and algorithms.
+                            You’ll learn how computers decide <strong>“Can I reach there?”</strong> and
+                            <strong>“What’s the shortest way?”</strong>
+                        </p>
+
+                        <div class="note-box" style="margin-top:0.9rem;">
+                            <div class="tag">Week 10 Roadmap</div>
+                            <div class="roadmap">
+                                <div class="road-step">
+                                    <span>Step 1</span>
+                                    Adjacency matrix = graph in table form
+                                </div>
+                                <div class="road-step">
+                                    <span>Step 2</span>
+                                    Direct vs one-hop vs two-hop vs many-hop routes
+                                </div>
+                                <div class="road-step">
+                                    <span>Step 3</span>
+                                    Graph where <strong>trains are nodes</strong> and <strong>stations are
+                                        edges</strong>
+                                </div>
+                                <div class="road-step">
+                                    <span>Step 4</span>
+                                    Pseudocode for reachability: 0-hop, 1-hop, 2-hop, n-hop
+                                </div>
+                                <div class="road-step">
+                                    <span>Step 5</span>
+                                    Edge-labelled graphs (distances &amp; train numbers)
+                                </div>
+                                <div class="road-step">
+                                    <span>Step 6</span>
+                                    Shortest distance between all pairs of stations
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="checklist">
+                            <div class="badge-note">By the end of this page you should be able to:</div>
+                            <ul>
+                                <li>Build an <strong>adjacency matrix</strong> for a small network</li>
+                                <li>Decide if one station can reach another in <strong>≤ k hops</strong></li>
+                                <li>Imagine a graph where <strong>trains are the nodes</strong></li>
+                                <li>Explain what <strong>“transitive closure”</strong> means in plain language</li>
+                                <li>Read and write <strong>pseudocode</strong> that builds hop-matrices</li>
+                                <li>Understand <strong>edge-labelled graphs</strong> &amp; shortest-distance tables</li>
+                            </ul>
+                            <p class="brain-break">Tiny note: it’s totally fine if your brain gets confused. Read
+                                slowly, poke the buttons, and let the patterns appear.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: GRAPH → TABLE → ADJACENCY MATRIX -->
+        <section id="adjacency-section">
+            <div class="card">
+                <span class="pill">Section 2</span>
+                <h2>2. From Train Map to Adjacency Matrix</h2>
+                <div class="two-col">
+                    <div>
+                        <p>
+                            We already know how to draw our train network as a <strong>graph</strong>:
+                        </p>
+                        <ul>
+                            <li>Each <strong>station</strong> is a node.</li>
+                            <li>Each <strong>train</strong> is a directed edge from its start station to its end
+                                station.</li>
+                        </ul>
+                        <p>
+                            Humans like pictures, but computers love <strong>tables</strong>.
+                            Instead of drawing arrows, we can store the same information in a <strong>matrix</strong>:
+                        </p>
+                        <ul>
+                            <li>Rows = “from” stations</li>
+                            <li>Columns = “to” stations</li>
+                            <li>Entry (i, j) tells us whether we can go <strong>directly</strong> from station i to
+                                station j.</li>
+                        </ul>
+                        <p>
+                            This table is called an <strong>adjacency matrix</strong>.
+                            For our 6 stations (KOL, NAG, DEL, PUN, SEC, KAN) we’ll have a 6×6 matrix.
+                            The diagonal cells (KOL→KOL, NAG→NAG, …) don’t really make sense as journeys,
+                            so we’ll mark them as “—”.
+                        </p>
+                        <p>
+                            In the simplest version, each off-diagonal cell is:
+                        </p>
+                        <ul>
+                            <li><strong>0</strong> → no direct train from i to j</li>
+                            <li><strong>1</strong> → at least one direct train from i to j</li>
+                        </ul>
+                        <p>
+                            Later, we’ll make the entries more interesting (train numbers, distances, times).
+                            But first, let’s build the basic 0/1 matrix for our mini train world.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3>Interactive 2.1 – Build the 0/1 adjacency matrix</h3>
+                        <p class="subtext">
+                            Click cells to toggle between blank → 1 → 0 → blank.
+                            Fill in where a direct train exists.
+                        </p>
+
+                        <div style="overflow-x:auto;">
+                            <table class="matrix-table" id="adjacency-builder-table"
+                                aria-label="Editable adjacency matrix">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>KOL</th>
+                                        <th>NAG</th>
+                                        <th>DEL</th>
+                                        <th>PUN</th>
+                                        <th>SEC</th>
+                                        <th>KAN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- rows populated by JS for robustness, but we'll still provide baseline cells for graceful degradation -->
+                                    <tr>
+                                        <th>KOL</th>
+                                        <td class="matrix-cell-diag">—</td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>NAG</th>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-diag">—</td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>DEL</th>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-diag">—</td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>PUN</th>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-diag">—</td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>SEC</th>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-diag">—</td>
+                                        <td class="matrix-cell-editable"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>KAN</th>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-editable"></td>
+                                        <td class="matrix-cell-diag">—</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex-row" style="margin-top:0.4rem;">
+                            <button class="btn btn-sm" id="check-adj-btn">Check my matrix</button>
+                            <button class="btn btn-sm btn-outline" id="reset-adj-btn" type="button">Reset</button>
+                            <button class="btn btn-sm btn-outline" id="show-graph-btn" type="button">Show graph</button>
+                        </div>
+                        <div id="adjacency-feedback" class="mcq-feedback"></div>
+
+                        <div id="graph-display" class="graph-card hidden" aria-live="polite">
+                            <div class="tag">Directed train graph (stations as nodes)</div>
+                            <div class="station-chips">
+                                <span class="station-chip">KOL</span>
+                                <span class="station-chip">NAG</span>
+                                <span class="station-chip">DEL</span>
+                                <span class="station-chip">PUN</span>
+                                <span class="station-chip">SEC</span>
+                                <span class="station-chip">KAN</span>
+                            </div>
+                            <div class="small-muted">Edges: each line is a directed edge (one-way train).</div>
+                            <ul class="edge-list">
+                                <li>KOL → NAG (T1, T2)</li>
+                                <li>NAG → SEC (T3)</li>
+                                <li>SEC → PUN (T4)</li>
+                                <li>PUN → DEL (T5)</li>
+                                <li>KOL → DEL (T6, T7)</li>
+                                <li>DEL → KAN (T8)</li>
+                                <li>KOL → KAN (T9)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:1.25rem;">
+                    <h3>Quick MCQ check</h3>
+                    <p class="subtext">A tiny checkpoint that your adjacency-matrix brain is awake.</p>
+
+                    <div class="mcq" data-question="adj-q1">
+                        <p><strong>Q1.</strong> In the adjacency matrix, what does the entry at row <code>PUN</code>,
+                            column <code>DEL</code> mean?</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="adj-q1" data-correct="false">
+                                (A) There is a train from DEL to PUN
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q1" data-correct="true">
+                                (B) There is a train from PUN to DEL
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q1" data-correct="false">
+                                (C) There is a train that passes through both PUN and DEL in any order
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q1" data-correct="false">
+                                (D) There is no train between them
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq" data-question="adj-q2">
+                        <p><strong>Q2.</strong> What do we put on the diagonal (e.g. KOL→KOL)?</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="adj-q2" data-correct="false">
+                                (A) 0
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q2" data-correct="false">
+                                (B) 1
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q2" data-correct="true">
+                                (C) “—” because we don’t travel from a station to itself
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q2" data-correct="false">
+                                (D) The number of trains starting there
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq" data-question="adj-q3">
+                        <p><strong>Q3.</strong> Our 0/1 adjacency matrix tells us:</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="adj-q3" data-correct="false">
+                                (A) Exact distances between stations
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q3" data-correct="true">
+                                (B) Only whether a direct train exists from i to j
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q3" data-correct="false">
+                                (C) How many trains start at each station
+                            </label>
+                            <label>
+                                <input type="radio" name="adj-q3" data-correct="false">
+                                (D) Average speed of trains
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: HOPS & TRANSITIVE CLOSURE -->
+        <section id="hops-section">
+            <div class="card">
+                <span class="pill">Section 3</span>
+                <h2>3. Direct, One-Hop, Two-Hop… and “Reachable or Not?”</h2>
+                <p>
+                    Our 0/1 matrix answers a yes/no question:
+                </p>
+                <p class="note-box">
+                    <em>“Can I go from station A to station B in <strong>one direct train</strong>?”</em>
+                </p>
+                <p>
+                    But life (and train travel) is rarely that simple. Often we are okay with <strong>changing
+                        trains</strong>:
+                </p>
+                <ul>
+                    <li>0 hops → A to B in one train (direct).</li>
+                    <li>1 hop → A → C → B (change once at C).</li>
+                    <li>2 hops → A → C → D → B (change twice), and so on.</li>
+                </ul>
+                <p>In graph language:</p>
+                <ul>
+                    <li>A <strong>path</strong> is a sequence of edges you can follow.</li>
+                    <li>The <strong>length</strong> of the path is the number of edges you use.</li>
+                </ul>
+                <p>With our adjacency matrix, we can ask:</p>
+                <ul>
+                    <li>“Is there a path from A to B of length 2?” (one hop)</li>
+                    <li>“Length 3?”</li>
+                    <li>“Length ≤ k?”</li>
+                </ul>
+                <p>
+                    If we allow <strong>any number of hops</strong>, the question becomes:
+                </p>
+                <p class="note-box">
+                    <em>“Is B <strong>reachable</strong> from A at all?”</em>
+                </p>
+                <p>
+                    Taking all possible hops into account and marking all reachable pairs in a big matrix is called
+                    taking the
+                    <strong>transitive closure</strong> of the graph.
+                </p>
+
+                <!-- One-hop reachability explorer -->
+                <div class="card" style="margin-top:1.4rem;">
+                    <h3>Interactive 3.1 – One-hop reachability explorer</h3>
+                    <p class="subtext">
+                        We'll build a new matrix <code>withinOne[i][j]</code> that is 1 if:
+                        <br>• there is a direct train (0 hops), <strong>or</strong>
+                        <br>• there exists some station <code>k</code> such that <code>direct[i][k] = 1</code> and
+                        <code>direct[k][j] = 1</code>.
+                    </p>
+
+                    <div class="matrix-grid">
+                        <div>
+                            <div class="matrix-caption">Direct matrix <span class="small-muted">(0 hops)</span></div>
+                            <table class="matrix-table" id="direct-matrix-table"></table>
+                        </div>
+                        <div>
+                            <div class="matrix-caption">Within one hop matrix <span class="small-muted">(≤1 hop)</span>
+                            </div>
+                            <table class="matrix-table" id="withinone-matrix-table"></table>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>Key concept: checking ≤1 hop</strong></p>
+                        <p>
+                            To check if A can reach B in <strong>at most one hop</strong>:
+                        </p>
+                        <ol>
+                            <li>Look at row A in the direct matrix. Find all stations C where
+                                <code>direct[A][C] = 1</code>.
+                            </li>
+                            <li>For each such C, look at row C. If <code>direct[C][B] = 1</code>, then A → C → B is a
+                                valid one-hop route.</li>
+                            <li>Also remember: if <code>direct[A][B] = 1</code>, we already have a 0-hop route.</li>
+                        </ol>
+                    </div>
+
+                    <div style="margin-top:0.9rem;">
+                        <div class="flex-row">
+                            <div>
+                                <label class="small-muted" for="onehop-start">Start station</label><br>
+                                <select id="onehop-start">
+                                    <option value="KOL">KOL</option>
+                                    <option value="NAG">NAG</option>
+                                    <option value="DEL">DEL</option>
+                                    <option value="PUN">PUN</option>
+                                    <option value="SEC">SEC</option>
+                                    <option value="KAN">KAN</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="small-muted" for="onehop-end">Target station</label><br>
+                                <select id="onehop-end">
+                                    <option value="KOL">KOL</option>
+                                    <option value="NAG">NAG</option>
+                                    <option value="DEL">DEL</option>
+                                    <option value="PUN">PUN</option>
+                                    <option value="SEC">SEC</option>
+                                    <option value="KAN">KAN</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-sm" id="explain-onehop-btn" type="button">Explain one-hop</button>
+                        </div>
+                        <div id="onehop-explanation" class="mcq-feedback" style="margin-top:0.5rem;"></div>
+                    </div>
+
+                    <div class="note-box" style="margin-top:1rem;">
+                        <p><strong>Example: Can we go from SEC to DEL in at most one hop?</strong></p>
+                        <ul>
+                            <li>Direct matrix: <code>direct[SEC][DEL] = 0</code> → no direct train.</li>
+                            <li>But <code>direct[SEC][PUN] = 1</code> (T4) and <code>direct[PUN][DEL] = 1</code> (T5).
+                            </li>
+                            <li>So SEC → PUN → DEL is a one-hop route. Therefore <code>withinOne[SEC][DEL] = 1</code>.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Hop slider -->
+                <div class="card" style="margin-top:1.4rem;">
+                    <h3>Interactive 3.2 – Hop slider (2 hops, 3 hops…)</h3>
+                    <p class="subtext">
+                        Move the slider to allow more hops. The matrix shows which station pairs are reachable in ≤ k
+                        hops.
+                    </p>
+                    <div style="margin-top:0.4rem;">
+                        <label for="hop-slider" class="small-muted">Maximum hops (k): <span
+                                id="hop-slider-value">0</span></label>
+                        <input id="hop-slider" type="range" min="0" max="4" step="1" value="0"
+                            style="width:100%; margin-top:0.2rem;">
+                    </div>
+
+                    <table class="matrix-table matrix-heat" id="hop-matrix-table" aria-label="Hop reachability matrix">
+                    </table>
+                    <div class="matrix-label">
+                        <span class="pill-label" style="background:#EEF2FF;border-color:#C7D2FE;">✓ reachable in ≤ k
+                            hops</span>
+                        &nbsp;
+                        <span class="small-muted">Cells show the minimum hops (edges) if reachable.</span>
+                    </div>
+                    <p class="brain-break">
+                        As we increase the allowed number of hops, more stations become reachable.
+                        If we go all the way up to (number of stations − 1) hops, we have explored
+                        <strong>every simple path</strong> without loops. The final matrix (“reachable or not”) is
+                        the <strong>transitive closure</strong> of our graph.
+                    </p>
+                </div>
+
+                <!-- Mini questions -->
+                <div class="card" style="margin-top:1.4rem;">
+                    <h3>Mini-questions: Can I get there?</h3>
+                    <p class="subtext">Quick yes/no checks using the hop logic.</p>
+
+                    <div class="mcq" data-question="hop-q1">
+                        <p><strong>Q1.</strong> Is KAN reachable from KOL in ≤ 1 hop?</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="hop-q1" data-correct="true">
+                                Yes (direct train T9: KOL → KAN)
+                            </label>
+                            <label>
+                                <input type="radio" name="hop-q1" data-correct="false">
+                                No
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq" data-question="hop-q2">
+                        <p><strong>Q2.</strong> Is SEC reachable from KOL in ≤ 2 hops?</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="hop-q2" data-correct="true">
+                                Yes, via KOL → NAG (T1 or T2), then NAG → SEC (T3)
+                            </label>
+                            <label>
+                                <input type="radio" name="hop-q2" data-correct="false">
+                                No
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq" data-question="hop-q3">
+                        <p><strong>Q3.</strong> Is there any way to go from KAN to KOL in our world?</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="hop-q3" data-correct="false">
+                                Yes, with enough hops
+                            </label>
+                            <label>
+                                <input type="radio" name="hop-q3" data-correct="true">
+                                No, KAN has no outgoing trains; KOL is not reachable
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: TRAINS AS NODES -->
+        <section id="trains-section">
+            <div class="card">
+                <span class="pill">Section 4</span>
+                <h2>4. Flipping the Story: Graph of Trains + Delay as “Water in Pipes”</h2>
+                <p>
+                    So far, we treated <strong>stations as nodes</strong> and <strong>trains as edges</strong>.
+                    But we can flip the viewpoint:
+                </p>
+                <ul>
+                    <li><strong>Nodes = trains</strong> (T1, T2, …, T9)</li>
+                    <li><strong>Edge between two trains</strong> if there is a station where you can <strong>get off one
+                            and catch the other</strong>.</li>
+                </ul>
+                <p>
+                    The label on the edge is the <strong>transfer station</strong> (and we could also store timing
+                    info).
+                </p>
+                <p>Example:</p>
+                <ul>
+                    <li>T1 (KOL→NAG) and T3 (NAG→SEC) share station NAG.
+                        If T1 arrives at NAG before T3 departs, you can connect there.
+                        So we draw an edge between T1 and T3 labelled “NAG”.</li>
+                </ul>
+                <p>
+                    A <strong>path in this new graph</strong> is a sequence of trains you can take one after another:
+                    <code>T1 → T3 → T4 → T5</code> is a journey KOL → NAG → SEC → PUN → DEL.
+                </p>
+                <p>
+                    This “train graph” is great for two things:
+                </p>
+                <ol>
+                    <li>Planning <strong>connections</strong>: can I eventually reach some train I really want to catch?
+                    </li>
+                    <li>Tracking <strong>delay propagation</strong>: if one train is late, which other trains get
+                        delayed because they are behind it on shared tracks?</li>
+                </ol>
+
+                <!-- Train connection map -->
+                <div class="card" style="margin-top:1.3rem;">
+                    <h3>Interactive 4.1 – Train connection map</h3>
+                    <p class="subtext">
+                        Here trains are nodes. There is a directed edge T<sub>i</sub> → T<sub>j</sub> if
+                        the end station of T<sub>i</sub> is the start station of T<sub>j</sub>.
+                    </p>
+
+                    <div class="tag">Trains</div>
+                    <div class="train-nodes" id="train-node-list" aria-label="Train nodes"></div>
+
+                    <div class="train-details" id="train-connection-details">
+                        Hover or tap on a train to see which other trains you can transfer to in one step.
+                    </div>
+
+                    <div class="train-route-output" id="train-route-output">
+                        <strong>Task 1.</strong> From KOL, suppose you board T1 (KOL→NAG).
+                        One possible sequence of trains that ends at DEL is:
+                        <br><code>T1 (KOL→NAG), T3 (NAG→SEC), T4 (SEC→PUN), T5 (PUN→DEL)</code>.
+                    </div>
+
+                    <div class="train-route-output" style="margin-top:0.6rem;">
+                        <strong>Task 2.</strong> Is there a way to go from any KOL→NAG train (T1 or T2) to a train that
+                        ends at KAN?
+                        <br>
+                        Yes. For example:
+                        <ul>
+                            <li>KOL → DEL via T6 or T7, then DEL → KAN via T8.</li>
+                            <li>Or KOL → KAN directly via T9.</li>
+                        </ul>
+                        <button class="btn btn-sm btn-outline" type="button" id="show-sample-route-btn">Show me one
+                            route</button>
+                        <div id="sample-route-text" class="hint hidden">
+                            Sample route: T6 (KOL→DEL), then T8 (DEL→KAN).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delay propagation -->
+                <div class="card" style="margin-top:1.3rem;">
+                    <h3>Delay propagation mini-sim</h3>
+                    <p>
+                        Imagine T6 (KOL→DEL, shorter route) is delayed by <strong>1 hour</strong> at DEL.
+                        T8 (DEL→KAN) is supposed to depart shortly after T6 normally arrives, using the same busy track
+                        section.
+                    </p>
+                    <p>
+                        Because T6 is late, T8 is forced to wait on that section.
+                        Now T8 also leaves DEL 1 hour late and arrives at KAN 1 hour late.
+                    </p>
+                    <p>
+                        Every shared segment where one late train blocks another is like <strong>water flowing through
+                            pipes</strong>:
+                        a delay at one node can push delays into connected trains, then into their next stations, and so
+                        on…
+                        until eventually there is a big enough gap between trains that the delay “dries up”.
+                    </p>
+
+                    <div class="delay-controls">
+                        <div>
+                            <label class="small-muted" for="delay-train-select">Train to delay</label><br>
+                            <select id="delay-train-select">
+                                <option value="T1">T1</option>
+                                <option value="T2">T2</option>
+                                <option value="T3">T3</option>
+                                <option value="T4">T4</option>
+                                <option value="T5">T5</option>
+                                <option value="T6">T6</option>
+                                <option value="T7">T7</option>
+                                <option value="T8">T8</option>
+                                <option value="T9">T9</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="small-muted" for="delay-minutes-input">Delay (minutes)</label><br>
+                            <input id="delay-minutes-input" type="number" min="5" max="300" step="5" value="60"
+                                style="width:90px;">
+                        </div>
+                        <button class="btn btn-sm" id="apply-delay-btn" type="button">Simulate delay</button>
+                        <button class="btn btn-sm btn-outline" id="clear-delay-btn" type="button">Clear</button>
+                    </div>
+
+                    <div class="train-details" id="delay-explanation">
+                        This simplified sim assumes a train passes delay to any trains that can connect <em>after</em>
+                        it on a shared station.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: PSEUDOCODE LAB -->
+        <section id="pseudocode-section">
+            <div class="card">
+                <span class="pill">Section 5</span>
+                <h2>5. Turning the Train Story into Pseudocode</h2>
+                <p>
+                    Now we move from pictures and tables to <strong>pseudocode</strong>.
+                    Our goal: given all the train cards, build:
+                </p>
+                <ul>
+                    <li>A dictionary of trains</li>
+                    <li>A list of stations</li>
+                    <li>An adjacency matrix for direct routes</li>
+                    <li>Matrices that tell us which stations are reachable in ≤ 1 hop, ≤ 2 hops, …, ≤ n hops.</li>
+                </ul>
+                <p>
+                    This is pure <strong>computational thinking</strong>:
+                </p>
+                <ul>
+                    <li>choose representations,</li>
+                    <li>break problems into steps,</li>
+                    <li>write clear procedures.</li>
+                </ul>
+
+                <!-- Representation -->
+                <h3>5.1 – Data structures</h3>
+                <span class="code-label">Representation</span>
+                <pre><code>* `trains` : dictionary
+  * key: train id like `"T1"`
+  * value: record with fields:
+    * `start` (station name)
+    * `end`   (station name)
+    * `distance` (in km)
+
+* `stations` : dictionary used as a set
+  * key: station name
+  * value: `true` (we don’t care about the value, only the keys)
+
+* `stationIndex` : dictionary
+  * key: station name
+  * value: index from `0` to `n-1`
+
+* `direct` : `n × n` matrix of 0/1
+  * `direct[i][j] = 1` if there is a train whose start station has index `i` and end station has index `j`.</code></pre>
+
+                <!-- buildDirectMatrix -->
+                <h3>5.2 – Building the direct matrix</h3>
+                <span class="code-label">Procedure `buildDirectMatrix(trains)`</span>
+                <pre><code>1. Create empty dictionary `stations = {}`.
+2. For each train `t` in `trains`:
+   * Let `s = trains[t].start`, `e = trains[t].end`.
+   * Add `s` to `stations`.
+   * Add `e` to `stations`.
+3. Let `n = number of keys in stations`.
+4. Create `n × n` matrix `direct` filled with 0.
+5. Create empty dictionary `stationIndex`.
+6. Let `i = 0`.
+7. For each station `name` in `stations` (in any fixed order):
+   * `stationIndex[name] = i`
+   * `i = i + 1`
+8. For each train `t` in `trains`:
+   * `i = stationIndex[ trains[t].start ]`
+   * `j = stationIndex[ trains[t].end ]`
+   * Set `direct[i][j] = 1`.
+9. Return `direct` and `stationIndex`.</code></pre>
+
+                <!-- withinOneHop -->
+                <h3>5.3 – Within-one-hop matrix</h3>
+                <span class="code-label">Procedure `withinOneHop(direct)`</span>
+                <pre><code>Input: `direct` = `n × n` 0/1 matrix
+Output: `withinOne` = `n × n` 0/1 matrix
+
+1. Let `n` be the number of rows in `direct`.
+2. Create `withinOne` as an `n × n` matrix of 0s.
+3. For each `i` from `0` to `n-1`:
+   For each `j` from `0` to `n-1`:
+   * If `direct[i][j] == 1`, then set `withinOne[i][j] = 1`
+   * Else:
+     * For each `k` from `0` to `n-1`:
+       * If `direct[i][k] == 1` AND `direct[k][j] == 1`,
+         then set `withinOne[i][j] = 1` and break out of the `k` loop.</code></pre>
+
+                <!-- withinTwoHops & oneMoreHop -->
+                <h3>5.4 – Two-hop & “one-more-hop”</h3>
+                <span class="code-label">Procedure `withinTwoHops(direct, withinOne)`</span>
+                <pre><code>1. Let `n` be the number of rows.
+2. Copy `withinOne` into `withinTwo`.
+3. For each `i` from `0` to `n-1`:
+   For each `j` from `0` to `n-1`:
+   * If `withinTwo[i][j] == 1`, continue.
+   * Else, for each `k` from `0` to `n-1`:
+     * If `withinOne[i][k] == 1` AND `direct[k][j] == 1`,
+       then set `withinTwo[i][j] = 1` and break.</code></pre>
+
+                <span class="code-label">General Procedure `oneMoreHop(direct, nHop)`</span>
+                <pre><code>1. Let `n` be the number of rows.
+2. Copy `nHop` into `nPlusOne`.
+3. For each `i` from `0` to `n-1`:
+   For each `j` from `0` to `n-1`:
+   * If `nPlusOne[i][j] == 1`, continue.
+   * Else, for each `k` from `0` to `n-1`:
+     * If `nHop[i][k] == 1` AND `direct[k][j] == 1`,
+       then set `nPlusOne[i][j] = 1` and break.
+4. Return `nPlusOne`.</code></pre>
+
+                <div class="note-box">
+                    <p>
+                        Starting from <code>direct</code> (0 hops), we can call <code>oneMoreHop</code> repeatedly:
+                    </p>
+                    <ul>
+                        <li>after 1 call → paths of length ≤ 1</li>
+                        <li>after 2 calls → paths of length ≤ 2</li>
+                        <li>…</li>
+                        <li>after (n−1) calls → all possible simple paths.</li>
+                    </ul>
+                    <p>
+                        This repeated “one more hop” process is the algorithmic way to build the
+                        <strong>transitive closure</strong>.
+                    </p>
+                </div>
+
+                <!-- Drag-and-drop pseudocode -->
+                <div class="card" style="margin-top:1.3rem;">
+                    <h3>Interactive 5.5 – Drag-and-drop pseudocode</h3>
+                    <p class="subtext">
+                        Put the key lines of <code>oneMoreHop</code> in the right order.
+                        Drag the blocks into place, then check yourself.
+                    </p>
+                    <ol class="small-muted" style="margin-top:0.4rem;">
+                        <li>Copy the old matrix.</li>
+                        <li>Loop over all pairs (i, j).</li>
+                        <li>If we already know i can reach j, skip.</li>
+                        <li>Otherwise, see if we can reach some k from i, then j from k.</li>
+                    </ol>
+
+                    <ul id="drag-list" class="drag-list">
+                        <li class="drag-item" draggable="true" data-order="0">Copy <code>nHop</code> into
+                            <code>nPlusOne</code>
+                        </li>
+                        <li class="drag-item" draggable="true" data-order="1">For each <code>i</code> from 0 to
+                            <code>n−1</code>
+                        </li>
+                        <li class="drag-item" draggable="true" data-order="2">For each <code>j</code> from 0 to
+                            <code>n−1</code>
+                        </li>
+                        <li class="drag-item" draggable="true" data-order="3">If <code>nPlusOne[i][j] == 1</code>,
+                            continue</li>
+                        <li class="drag-item" draggable="true" data-order="4">Else, for each <code>k</code> from 0 to
+                            <code>n−1</code>
+                        </li>
+                        <li class="drag-item" draggable="true" data-order="5">If <code>nHop[i][k] == 1</code> AND
+                            <code>direct[k][j] == 1</code> then set <code>nPlusOne[i][j] = 1</code> and break
+                        </li>
+                        <li class="drag-item" draggable="true" data-order="6">Return <code>nPlusOne</code></li>
+                    </ul>
+                    <div class="flex-row" style="margin-top:0.5rem;">
+                        <button class="btn btn-sm" id="check-drag-btn" type="button">Check order</button>
+                        <button class="btn btn-sm btn-outline" id="reset-drag-btn" type="button">Shuffle</button>
+                    </div>
+                    <div id="drag-feedback" class="mcq-feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: EDGE-LABELLED GRAPHS & SHORTEST DISTANCE -->
+        <section id="edges-section">
+            <div class="card">
+                <span class="pill">Section 6</span>
+                <h2>6. Adding Labels: Train Numbers, Distances &amp; Shortest Paths</h2>
+                <p>
+                    A plain adjacency matrix only stores 0 or 1.
+                    But we can attach more information to each edge:
+                </p>
+                <ul>
+                    <li>Which train(s) connect two stations</li>
+                    <li>Distances in km</li>
+                    <li>Travel times</li>
+                </ul>
+                <p>
+                    When we store extra data on edges, we get an <strong>edge-labelled graph</strong>.
+                </p>
+                <p>Example ideas:</p>
+                <ul>
+                    <li><code>directTrains[i][j]</code> could be a list of train ids that go from station i to station
+                        j.</li>
+                    <li><code>directDist[i][j]</code> could be the <strong>shortest distance</strong> among all those
+                        trains (0 if no direct train).</li>
+                </ul>
+                <p>
+                    Because KOL and DEL have two different trains (T6 and T7) with different distances and times,
+                    <code>directTrains[KOL][DEL] = [T6, T7]</code> and
+                    <code>directDist[KOL][DEL] = 1450</code> (we keep the <strong>shorter</strong> distance).
+                </p>
+                <p>
+                    By combining these edge labels with our “one more hop” idea,
+                    we can find <strong>shortest total distance paths</strong> between any two stations.
+                </p>
+
+                <!-- buildDirectDistance -->
+                <h3>6.1 – Building a distance matrix</h3>
+                <span class="code-label">Procedure `buildDirectDistance(trains)`</span>
+                <pre><code>1. Use the same `stations` and `stationIndex` construction as in `buildDirectMatrix`.
+2. Let `n` be the number of stations.
+3. Create `directDist` as an `n × n` matrix filled with 0.
+4. For each train `t` in `trains`:
+   * `i = stationIndex[ trains[t].start ]`
+   * `j = stationIndex[ trains[t].end ]`
+   * `d = trains[t].distance`
+   * If `directDist[i][j] == 0` (no distance yet), set `directDist[i][j] = d`.
+   * Else set `directDist[i][j] = min(directDist[i][j], d)`.
+5. Return `directDist`.</code></pre>
+
+                <div class="note-box">
+                    <p>
+                        For each pair of stations (i, j), <code>directDist[i][j]</code> stores the
+                        <strong>shortest known direct distance</strong> among all trains that go from i to j.
+                        If <code>directDist[i][j] = 0</code>, we treat that as “no direct train”.
+                    </p>
+                </div>
+
+                <!-- withinOneHopDistance -->
+                <h3>6.2 – Distances with one hop</h3>
+                <span class="code-label">Procedure `withinOneHopDistance(directDist)`</span>
+                <pre><code>1. Let `n` be the number of stations.
+2. Create `oneHopDist` as an `n × n` matrix.
+3. For all `i, j`, set `oneHopDist[i][j] = directDist[i][j]`.
+4. For each `i` in `0..n-1`:
+   For each `j` in `0..n-1`:
+   * For each `k` in `0..n-1`:
+     * If `directDist[i][k] > 0` AND `directDist[k][j] > 0` then:
+       * `newDist = directDist[i][k] + directDist[k][j]`
+       * If `oneHopDist[i][j] == 0` OR `newDist &lt; oneHopDist[i][j]` then
+         set `oneHopDist[i][j] = newDist`.
+5. Return `oneHopDist`.</code></pre>
+
+                <p>
+                    This is the distance version of our one-hop matrix:
+                    for each possible intermediate station k, we check if going i → k → j gives a shorter route than
+                    what we already know.
+                </p>
+
+                <!-- Shortest route puzzles -->
+                <div class="card" style="margin-top:1.3rem;">
+                    <h3>Interactive 6.3 – Shortest route puzzles</h3>
+
+                    <div class="card" style="margin-bottom:0.9rem; border-radius:12px; padding:0.9rem;">
+                        <h4 style="margin-top:0;">Puzzle 1: KOL → DEL (direct trains T6 vs T7)</h4>
+                        <p>
+                            There are two direct trains from KOL to DEL:
+                        </p>
+                        <ul>
+                            <li>T6: 1450 km, 17 hours (runs Mon/Fri)</li>
+                            <li>T7: 1530 km, 21 hours (runs daily)</li>
+                        </ul>
+                        <div class="mcq" data-question="p1-q1">
+                            <p><strong>Q1.</strong> Which train gives the <strong>shorter distance</strong>?</p>
+                            <div class="mcq-options">
+                                <label>
+                                    <input type="radio" name="p1-q1" data-correct="true">
+                                    T6
+                                </label>
+                                <label>
+                                    <input type="radio" name="p1-q1" data-correct="false">
+                                    T7
+                                </label>
+                            </div>
+                            <div class="mcq-feedback"></div>
+                        </div>
+
+                        <div class="mcq" data-question="p1-q2">
+                            <p><strong>Q2.</strong> Which train might be more useful if today is Wednesday?</p>
+                            <div class="mcq-options">
+                                <label>
+                                    <input type="radio" name="p1-q2" data-correct="false">
+                                    T6
+                                </label>
+                                <label>
+                                    <input type="radio" name="p1-q2" data-correct="true">
+                                    T7, because T6 doesn’t run on Wednesday
+                                </label>
+                            </div>
+                            <div class="mcq-feedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom:0.9rem; border-radius:12px; padding:0.9rem;">
+                        <h4 style="margin-top:0;">Puzzle 2: KOL → SEC shortest distance</h4>
+                        <p>
+                            Find the shortest total distance (in km) from <strong>KOL to SEC</strong> using our dataset.
+                            You may use any route you like.
+                        </p>
+                        <p>
+                            Correct minimal route:
+                        </p>
+                        <ul>
+                            <li>KOL → NAG (T1 or T2): 1130 km</li>
+                            <li>NAG → SEC (T3): 580 km</li>
+                        </ul>
+                        <p>Total = 1710 km.</p>
+                        <div class="flex-row" style="margin-top:0.5rem;">
+                            <label for="kol-sec-input" class="small-muted">Your answer (km):</label>
+                            <input id="kol-sec-input" type="number" class="inline-input" placeholder="e.g. 1710">
+                            <button class="btn btn-sm" id="check-kol-sec-btn" type="button">Check</button>
+                        </div>
+                        <div id="kol-sec-feedback" class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="card" style="border-radius:12px; padding:0.9rem;">
+                        <h4 style="margin-top:0;">Puzzle 3: SEC → KAN</h4>
+                        <p>
+                            Is it possible to reach <strong>KAN</strong> from <strong>SEC</strong>?
+                            If yes, what is one shortest-distance route and its total distance?
+                        </p>
+                        <p>Correct idea:</p>
+                        <ul>
+                            <li>SEC → PUN (T4) 600 km</li>
+                            <li>PUN → DEL (T5) 1520 km</li>
+                            <li>DEL → KAN (T8) 440 km</li>
+                        </ul>
+                        <p>Total = 2560 km.</p>
+
+                        <div style="margin-top:0.5rem;">
+                            <label class="small-muted" for="sec-kan-route-input">Type a route (stations, e.g.
+                                SEC→PUN→DEL→KAN):</label>
+                            <input id="sec-kan-route-input" type="text" placeholder="SEC→PUN→DEL→KAN">
+                        </div>
+                        <div style="margin-top:0.4rem;">
+                            <label class="small-muted" for="sec-kan-dist-input">Total distance (km):</label>
+                            <input id="sec-kan-dist-input" type="number" class="inline-input" placeholder="e.g. 2560">
+                        </div>
+                        <button class="btn btn-sm" id="check-sec-kan-btn" type="button" style="margin-top:0.4rem;">Check
+                            route</button>
+                        <div id="sec-kan-feedback" class="mcq-feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: WRAP-UP + QUIZ -->
+        <section id="wrapup-section">
+            <div class="card">
+                <span class="pill">Section 7</span>
+                <h2>Week 10 Wrap-Up &amp; Self-Check Quiz</h2>
+                <div class="card" style="margin-bottom:1.3rem;">
+                    <h3 style="margin-top:0;">Week 10 in One Page</h3>
+                    <p>
+                        <strong>Week 10 in One Page</strong>
+                    </p>
+                    <ul>
+                        <li>We turned a train network into an <strong>adjacency matrix</strong>.</li>
+                        <li>We used hops and paths to ask “Can I reach there?” and met <strong>transitive
+                                closure</strong>.</li>
+                        <li>We flipped the graph: <strong>trains as nodes</strong>, edges as transfer stations, and used
+                            it to reason about <strong>connections</strong> and <strong>delay propagation</strong>.</li>
+                        <li>We wrote <strong>pseudocode</strong> to build direct matrices, one-hop, two-hop, and n-hop
+                            reachability.</li>
+                        <li>We added labels (train ids, distances) to edges and computed <strong>shortest
+                                distances</strong>.</li>
+                    </ul>
+                    <p>
+                        Behind all this is one big idea:
+                    </p>
+                    <p class="note-box">
+                        <em>Once you choose the right representation,<br>
+                            complicated real-world questions become systematic algorithms.</em>
+                    </p>
+                </div>
+
+                <!-- Final quiz -->
+                <div class="card">
+                    <h3 style="margin-top:0;">Final 5-question quiz</h3>
+                    <p class="subtext">
+                        Quick self-check. No exam vibes – just see what stuck. 👀
+                    </p>
+
+                    <div class="mcq mcq-final" data-question="final-q1">
+                        <p><strong>Q1.</strong> What does an entry <code>direct[i][j] = 1</code> mean?</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="final-q1" data-correct="false">
+                                (A) Every train between i and j takes the same route
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q1" data-correct="true">
+                                (B) At least one direct train goes from station i to station j
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q1" data-correct="false">
+                                (C) i and j have the same distance from the origin
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q1" data-correct="false">
+                                (D) There is a path of length 2 from i to j
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq mcq-final" data-question="final-q2">
+                        <p><strong>Q2.</strong> In our “trains as nodes” graph, what does an edge between T3 and T4
+                            labelled “SEC” mean?</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="final-q2" data-correct="false">
+                                (A) T3 and T4 have the same distance
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q2" data-correct="true">
+                                (B) You can switch from one train to the other at station SEC
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q2" data-correct="false">
+                                (C) SEC is the starting station of both trains
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q2" data-correct="false">
+                                (D) The trains never meet
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq mcq-final" data-question="final-q3">
+                        <p><strong>Q3.</strong> The transitive closure of a graph tells you:</p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="final-q3" data-correct="false">
+                                (A) The shortest distance along every route
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q3" data-correct="false">
+                                (B) Which pairs of stations are directly connected
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q3" data-correct="true">
+                                (C) Which pairs of stations are connected by <strong>some path of any length</strong>
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q3" data-correct="false">
+                                (D) How many trains stop at each station
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq mcq-final" data-question="final-q4">
+                        <p><strong>Q4.</strong> In <code>buildDirectDistance</code>, why do we use
+                            <code>min(old, newDistance)</code>?
+                        </p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="final-q4" data-correct="false">
+                                (A) To keep the longest route
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q4" data-correct="false">
+                                (B) To keep the first distance we saw
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q4" data-correct="true">
+                                (C) To keep the <strong>shortest</strong> direct distance found so far between the same
+                                pair of stations
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q4" data-correct="false">
+                                (D) To ignore duplicates
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <div class="mcq mcq-final" data-question="final-q5">
+                        <p><strong>Q5.</strong> When computing distances with one hop, why do we add
+                            <code>directDist[i][k] + directDist[k][j]</code>?
+                        </p>
+                        <div class="mcq-options">
+                            <label>
+                                <input type="radio" name="final-q5" data-correct="false">
+                                (A) To compare speeds
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q5" data-correct="true">
+                                (B) Because the total distance is the sum of the two legs i→k and k→j
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q5" data-correct="false">
+                                (C) Because we divide the distance by 2
+                            </label>
+                            <label>
+                                <input type="radio" name="final-q5" data-correct="false">
+                                (D) To count how many trains are used
+                            </label>
+                        </div>
+                        <div class="mcq-feedback"></div>
+                    </div>
+
+                    <button class="btn btn-full" id="final-quiz-btn" type="button" style="margin-top:0.9rem;">Check my
+                        score</button>
+                    <div id="final-quiz-result" class="quiz-result hidden"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // THEME SYNC WITH MAIN SITE
+        const themeBtn = document.getElementById('themeBtn');
+        const html = document.documentElement;
+
+        // Sync theme with main site on load
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            html.setAttribute('data-theme', savedTheme);
+            themeBtn.textContent = savedTheme === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+        }
+
+        initTheme();
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+        });
+
+        // DATASET
+        const stationNames = ["KOL", "NAG", "DEL", "PUN", "SEC", "KAN"];
+        const stationIndex = Object.fromEntries(stationNames.map((s, i) => [s, i]));
+
+        const trains = [
+            { id: "T1", from: "KOL", to: "NAG", distance: 1130, time: 17, days: ["Mon", "Wed", "Thu", "Sun"] },
+            { id: "T2", from: "KOL", to: "NAG", distance: 1130, time: 17, days: ["Tue", "Fri", "Sat"] },
+            { id: "T3", from: "NAG", to: "SEC", distance: 580, time: 9, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+            { id: "T4", from: "SEC", to: "PUN", distance: 600, time: 10, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+            { id: "T5", from: "PUN", to: "DEL", distance: 1520, time: 20, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+            { id: "T6", from: "KOL", to: "DEL", distance: 1450, time: 17, days: ["Mon", "Fri"] },
+            { id: "T7", from: "KOL", to: "DEL", distance: 1530, time: 21, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+            { id: "T8", from: "DEL", to: "KAN", distance: 440, time: 7, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+            { id: "T9", from: "KOL", to: "KAN", distance: 1010, time: 16, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
+        ];
+
+        const nStations = stationNames.length;
+
+        // Build direct 0/1 adjacency matrix from dataset (correct answer)
+        const directMatrix = Array.from({ length: nStations }, () => Array(nStations).fill(0));
+        trains.forEach(tr => {
+            const i = stationIndex[tr.from];
+            const j = stationIndex[tr.to];
+            directMatrix[i][j] = 1;
+        });
+
+        // Build distance matrix (shortest direct distance)
+        const directDist = Array.from({ length: nStations }, () => Array(nStations).fill(0));
+        trains.forEach(tr => {
+            const i = stationIndex[tr.from];
+            const j = stationIndex[tr.to];
+            if (directDist[i][j] === 0) {
+                directDist[i][j] = tr.distance;
+            } else {
+                directDist[i][j] = Math.min(directDist[i][j], tr.distance);
+            }
+        });
+
+        // ========== PROGRESS BAR ==========
+        const progressState = {
+            adjacency: false,
+            hopsMini: false,
+            puzzles: false,
+            finalQuiz: false
+        };
+
+        function updateProgress() {
+            const total = Object.keys(progressState).length;
+            const done = Object.values(progressState).filter(Boolean).length;
+            const pct = (done / total) * 100;
+            const fill = document.getElementById("progress-fill");
+            const text = document.getElementById("progress-text");
+            if (fill) fill.style.width = pct + "%";
+            if (text) text.textContent = `${done}/${total} activities done`;
+        }
+
+        function markComplete(key) {
+            if (!progressState[key]) {
+                progressState[key] = true;
+                updateProgress();
+            }
+        }
+
+        updateProgress();
+
+        // ========== SECTION 2: ADJACENCY BUILDER ==========
+        (function setupAdjacencyBuilder() {
+            const table = document.getElementById("adjacency-builder-table");
+            if (!table) return;
+
+            // Tag cells with row/col indices
+            const bodyRows = table.tBodies[0].rows;
+            for (let r = 0; r < bodyRows.length; r++) {
+                const cells = bodyRows[r].cells;
+                for (let c = 0; c < cells.length; c++) {
+                    const cell = cells[c];
+                    if (c === 0) continue; // row header
+                    const isDiag = (r === c - 1);
+                    if (isDiag) {
+                        cell.classList.add("matrix-cell-diag");
+                        cell.textContent = "—";
+                    } else {
+                        cell.classList.add("matrix-cell-editable");
+                        cell.dataset.row = r.toString();
+                        cell.dataset.col = (c - 1).toString();
+                        cell.addEventListener("click", () => {
+                            if (cell.textContent === "") {
+                                cell.textContent = "1";
+                            } else if (cell.textContent === "1") {
+                                cell.textContent = "0";
+                            } else {
+                                cell.textContent = "";
+                            }
+                            cell.classList.remove("matrix-cell-wrong");
+                        });
+                    }
+                }
+            }
+
+            const feedback = document.getElementById("adjacency-feedback");
+            const checkBtn = document.getElementById("check-adj-btn");
+            const resetBtn = document.getElementById("reset-adj-btn");
+            const showGraphBtn = document.getElementById("show-graph-btn");
+            const graphDisplay = document.getElementById("graph-display");
+
+            if (checkBtn) {
+                checkBtn.addEventListener("click", () => {
+                    let allFilled = true;
+                    let correct = true;
+                    for (let r = 0; r < nStations; r++) {
+                        for (let c = 0; c < nStations; c++) {
+                            if (r === c) continue;
+                            const cell = table.tBodies[0].rows[r].cells[c + 1];
+                            const expected = directMatrix[r][c];
+                            const valText = cell.textContent.trim();
+                            if (valText !== "0" && valText !== "1") {
+                                allFilled = false;
+                                correct = false;
+                                cell.classList.add("matrix-cell-wrong");
+                            } else {
+                                const val = valText === "1" ? 1 : 0;
+                                if (val !== expected) {
+                                    correct = false;
+                                    cell.classList.add("matrix-cell-wrong");
+                                } else {
+                                    cell.classList.remove("matrix-cell-wrong");
+                                }
+                            }
+                        }
+                    }
+                    if (correct && allFilled) {
+                        feedback.textContent = "✅ Nice! You’ve just turned a messy train map into a clean adjacency matrix. This 0/1 table is the starting point for everything else in this week.";
+                        feedback.style.color = "#166534";
+                        markComplete("adjacency");
+                    } else if (!allFilled) {
+                        feedback.textContent = "Almost there. Some cells are still blank or incorrect. Hint: look again at which stations are start stations in the train list. Only those directions should get a “1”.";
+                        feedback.style.color = "#92400E";
+                    } else {
+                        feedback.textContent = "Some entries don’t match the actual trains. Hint: only put 1 if there is at least one direct train from that row station to that column station.";
+                        feedback.style.color = "#92400E";
+                    }
+                });
+            }
+
+            if (resetBtn) {
+                resetBtn.addEventListener("click", () => {
+                    for (let r = 0; r < nStations; r++) {
+                        for (let c = 0; c < nStations; c++) {
+                            if (r === c) continue;
+                            const cell = table.tBodies[0].rows[r].cells[c + 1];
+                            cell.textContent = "";
+                            cell.classList.remove("matrix-cell-wrong");
+                        }
+                    }
+                    if (feedback) feedback.textContent = "";
+                });
+            }
+
+            if (showGraphBtn && graphDisplay) {
+                showGraphBtn.addEventListener("click", () => {
+                    graphDisplay.classList.toggle("hidden");
+                    showGraphBtn.textContent = graphDisplay.classList.contains("hidden") ? "Show graph" : "Hide graph";
+                });
+            }
+        })();
+
+        // ========== GENERIC MCQ HANDLER ==========
+        (function setupMCQs() {
+            const mcqs = document.querySelectorAll(".mcq");
+            mcqs.forEach(block => {
+                const options = block.querySelectorAll("input[type='radio']");
+                const feedback = block.querySelector(".mcq-feedback");
+                options.forEach(input => {
+                    input.addEventListener("change", () => {
+                        options.forEach(i => {
+                            if (i.parentElement) {
+                                i.parentElement.classList.remove("mcq-correct", "mcq-incorrect");
+                            }
+                        });
+                        if (input.dataset.correct === "true") {
+                            if (feedback) {
+                                feedback.textContent = "✅ Correct!";
+                                feedback.style.color = "#166534";
+                            }
+                            if (input.parentElement) {
+                                input.parentElement.classList.add("mcq-correct");
+                            }
+                        } else {
+                            if (feedback) {
+                                feedback.textContent = "Not quite. Re-read the question and try again.";
+                                feedback.style.color = "#92400E";
+                            }
+                            if (input.parentElement) {
+                                input.parentElement.classList.add("mcq-incorrect");
+                            }
+                        }
+                    });
+                });
+            });
+        })();
+
+        // ========== SECTION 3: DIRECT & WITHIN ONE HOP MATRICES ==========
+        function computeWithinOne(direct) {
+            const n = direct.length;
+            const within = Array.from({ length: n }, () => Array(n).fill(0));
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (direct[i][j] === 1) {
+                        within[i][j] = 1;
+                    } else {
+                        for (let k = 0; k < n; k++) {
+                            if (direct[i][k] === 1 && direct[k][j] === 1) {
+                                within[i][j] = 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return within;
+        }
+
+        const withinOneMatrix = computeWithinOne(directMatrix);
+
+        function buildMatrixTable(tableId, matrix, showDiagDash = true) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            table.innerHTML = "";
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            headerRow.appendChild(document.createElement("th")); // empty corner
+            stationNames.forEach(name => {
+                const th = document.createElement("th");
+                th.textContent = name;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+            for (let i = 0; i < nStations; i++) {
+                const row = document.createElement("tr");
+                const rowHeader = document.createElement("th");
+                rowHeader.textContent = stationNames[i];
+                row.appendChild(rowHeader);
+                for (let j = 0; j < nStations; j++) {
+                    const td = document.createElement("td");
+                    td.dataset.row = i.toString();
+                    td.dataset.col = j.toString();
+                    if (i === j && showDiagDash) {
+                        td.textContent = "—";
+                        td.classList.add("reach-diag");
+                    } else {
+                        td.textContent = matrix[i][j].toString();
+                    }
+                    row.appendChild(td);
+                }
+                tbody.appendChild(row);
+            }
+            table.appendChild(tbody);
+        }
+
+        buildMatrixTable("direct-matrix-table", directMatrix);
+        buildMatrixTable("withinone-matrix-table", withinOneMatrix);
+
+        // Explanation for one-hop
+        (function setupOneHopExplain() {
+            const startSel = document.getElementById("onehop-start");
+            const endSel = document.getElementById("onehop-end");
+            const btn = document.getElementById("explain-onehop-btn");
+            const output = document.getElementById("onehop-explanation");
+            if (!startSel || !endSel || !btn || !output) return;
+
+            btn.addEventListener("click", () => {
+                const start = startSel.value;
+                const end = endSel.value;
+                const i = stationIndex[start];
+                const j = stationIndex[end];
+
+                // Clear highlights
+                ["direct-matrix-table", "withinone-matrix-table"].forEach(id => {
+                    const table = document.getElementById(id);
+                    if (!table) return;
+                    table.querySelectorAll("td").forEach(td => td.style.outline = "");
+                });
+
+                const directRow = directMatrix[i];
+                const neighbors = [];
+                for (let k = 0; k < nStations; k++) {
+                    if (directRow[k] === 1) neighbors.push(stationNames[k]);
+                }
+
+                const hasDirect = directMatrix[i][j] === 1;
+                const via = [];
+                for (let k = 0; k < nStations; k++) {
+                    if (directMatrix[i][k] === 1 && directMatrix[k][j] === 1) {
+                        via.push(stationNames[k]);
+                    }
+                }
+
+                // Highlight row in direct
+                const directTable = document.getElementById("direct-matrix-table");
+                if (directTable) {
+                    directTable.querySelectorAll(`td[data-row='${i}']`).forEach(td => {
+                        td.style.outline = "2px solid #4F46E5";
+                    });
+                }
+                const withinTable = document.getElementById("withinone-matrix-table");
+                if (withinTable) {
+                    withinTable.querySelectorAll(`td[data-row='${i}']`).forEach(td => {
+                        td.style.outline = "2px solid #4F46E5";
+                    });
+                }
+
+                let msg = "";
+                if (hasDirect) {
+                    msg += `There is a direct train from ${start} to ${end}, so you already have a 0-hop route. `;
+                }
+                if (via.length > 0) {
+                    msg += `You can also reach ${end} from ${start} in one hop via: `;
+                    msg += via.map(v => `${start} → ${v} → ${end}`).join(", ") + ".";
+                }
+                if (!hasDirect && via.length === 0) {
+                    msg = `There is no route from ${start} to ${end} in at most one hop in this mini-world.`;
+                }
+                output.textContent = msg;
+                output.style.color = "#374151";
+            });
+        })();
+
+        // Hop distances via BFS (min hops)
+        function computeHopDistances(adj) {
+            const n = adj.length;
+            const dist = Array.from({ length: n }, () => Array(n).fill(Infinity));
+            for (let s = 0; s < n; s++) {
+                const queue = [s];
+                dist[s][s] = 0;
+                let qIndex = 0;
+                while (qIndex < queue.length) {
+                    const u = queue[qIndex++];
+                    for (let v = 0; v < n; v++) {
+                        if (adj[u][v] === 1 && dist[s][v] === Infinity) {
+                            dist[s][v] = dist[s][u] + 1;
+                            queue.push(v);
+                        }
+                    }
+                }
+            }
+            return dist;
+        }
+
+        const hopDistances = computeHopDistances(directMatrix);
+
+        function buildHopMatrix(k) {
+            const table = document.getElementById("hop-matrix-table");
+            if (!table) return;
+            table.innerHTML = "";
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            headerRow.appendChild(document.createElement("th"));
+            stationNames.forEach(name => {
+                const th = document.createElement("th");
+                th.textContent = name;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+            for (let i = 0; i < nStations; i++) {
+                const row = document.createElement("tr");
+                const rowHeader = document.createElement("th");
+                rowHeader.textContent = stationNames[i];
+                row.appendChild(rowHeader);
+                for (let j = 0; j < nStations; j++) {
+                    const td = document.createElement("td");
+                    const d = hopDistances[i][j];
+                    if (i === j) {
+                        td.textContent = "—";
+                        td.classList.add("reach-diag");
+                    } else if (d <= k) {
+                        td.textContent = d.toString();
+                        td.classList.add("reach-yes");
+                    } else if (d < Infinity) {
+                        td.textContent = d.toString();
+                        td.classList.add("reach-no");
+                    } else {
+                        td.textContent = "0";
+                        td.classList.add("reach-no");
+                    }
+                    row.appendChild(td);
+                }
+                tbody.appendChild(row);
+            }
+            table.appendChild(tbody);
+        }
+
+        (function setupHopSlider() {
+            const slider = document.getElementById("hop-slider");
+            const label = document.getElementById("hop-slider-value");
+            if (!slider || !label) return;
+            const update = () => {
+                const k = parseInt(slider.value, 10);
+                label.textContent = k.toString();
+                buildHopMatrix(k);
+            };
+            slider.addEventListener("input", update);
+            update();
+        })();
+
+        // Track Section 3 mini-questions correctness for progress
+        (function trackHopMini() {
+            const hopBlocks = ["hop-q1", "hop-q2", "hop-q3"].map(q => document.querySelector(`.mcq[data-question='${q}']`));
+            hopBlocks.forEach(block => {
+                if (!block) return;
+                const inputs = block.querySelectorAll("input[type='radio']");
+                inputs.forEach(inp => {
+                    inp.addEventListener("change", () => {
+                        // check if all three have correct answer selected
+                        const allCorrect = hopBlocks.every(b => {
+                            if (!b) return false;
+                            const inpCorrect = b.querySelector("input[data-correct='true']");
+                            return inpCorrect && inpCorrect.checked;
+                        });
+                        if (allCorrect) {
+                            markComplete("hopsMini");
+                        }
+                    });
+                });
+            });
+        })();
+
+        // ========== SECTION 4: TRAINS AS NODES & DELAY ==========
+        (function setupTrainsAsNodes() {
+            const container = document.getElementById("train-node-list");
+            const details = document.getElementById("train-connection-details");
+            if (!container || !details) return;
+
+            // Build train adjacency graph: edge T_i -> T_j if end of i == start of j
+            const trainIndex = Object.fromEntries(trains.map((t, i) => [t.id, i]));
+            const trainAdj = Array.from({ length: trains.length }, () => []);
+            const trainAdjLabel = {}; // key "i-j" -> station
+
+            for (let i = 0; i < trains.length; i++) {
+                for (let j = 0; j < trains.length; j++) {
+                    if (i === j) continue;
+                    const a = trains[i];
+                    const b = trains[j];
+                    if (a.to === b.from) {
+                        trainAdj[i].push(j);
+                        trainAdjLabel[`${i}-${j}`] = a.to;
+                    }
+                }
+            }
+
+            // Create nodes
+            trains.forEach(tr => {
+                const div = document.createElement("div");
+                div.className = "train-node";
+                div.id = `train-node-${tr.id}`;
+                div.dataset.trainId = tr.id;
+                div.textContent = `${tr.id} (${tr.from}→${tr.to})`;
+                div.title = `Distance: ${tr.distance} km, time: ${tr.time} h`;
+                container.appendChild(div);
+            });
+
+            function clearActive() {
+                container.querySelectorAll(".train-node").forEach(node => {
+                    node.classList.remove("train-node-active");
+                });
+            }
+
+            function setTrainHover(trainId) {
+                const idx = trainIndex[trainId];
+                clearActive();
+                const node = document.getElementById(`train-node-${trainId}`);
+                if (node) node.classList.add("train-node-active");
+
+                const outs = trainAdj[idx].map(j => {
+                    const t = trains[j];
+                    const station = trainAdjLabel[`${idx}-${j}`];
+                    const nodeEl = document.getElementById(`train-node-${t.id}`);
+                    if (nodeEl) nodeEl.classList.add("train-node-active");
+                    return `${trains[idx].id} → ${t.id} via ${station}`;
+                });
+
+                if (outs.length === 0) {
+                    details.textContent = `${trainId} has no outgoing transfer in one step in this simple train-graph.`;
+                } else {
+                    details.innerHTML = `<strong>${trainId}</strong> can transfer in one step to:<br>` +
+                        outs.map(s => `• ${s}`).join("<br>");
+                }
+            }
+
+            container.querySelectorAll(".train-node").forEach(node => {
+                const id = node.dataset.trainId;
+                node.addEventListener("mouseenter", () => setTrainHover(id));
+                node.addEventListener("click", () => setTrainHover(id));
+            });
+
+            const sampleBtn = document.getElementById("show-sample-route-btn");
+            const sampleText = document.getElementById("sample-route-text");
+            if (sampleBtn && sampleText) {
+                sampleBtn.addEventListener("click", () => {
+                    sampleText.classList.toggle("hidden");
+                });
+            }
+
+            // Delay simulation
+            const delayTrainSelect = document.getElementById("delay-train-select");
+            const delayMinutesInput = document.getElementById("delay-minutes-input");
+            const applyDelayBtn = document.getElementById("apply-delay-btn");
+            const clearDelayBtn = document.getElementById("clear-delay-btn");
+            const delayExplanation = document.getElementById("delay-explanation");
+
+            function clearDelays() {
+                container.querySelectorAll(".train-node").forEach(node => {
+                    node.classList.remove("train-node-delayed");
+                    node.removeAttribute("data-delay");
+                });
+                if (delayExplanation) {
+                    delayExplanation.textContent = "This simplified sim assumes a train passes delay to any trains that can connect after it on a shared station.";
+                }
+            }
+
+            if (applyDelayBtn && delayTrainSelect && delayMinutesInput) {
+                applyDelayBtn.addEventListener("click", () => {
+                    clearDelays();
+                    const startId = delayTrainSelect.value;
+                    const minutes = parseInt(delayMinutesInput.value, 10) || 0;
+                    const startIdx = trainIndex[startId];
+
+                    // BFS over trainAdj starting from startIdx
+                    const visited = new Set();
+                    const queue = [startIdx];
+                    visited.add(startIdx);
+                    while (queue.length) {
+                        const u = queue.shift();
+                        const nodeEl = document.getElementById(`train-node-${trains[u].id}`);
+                        if (nodeEl) {
+                            nodeEl.classList.add("train-node-delayed");
+                            nodeEl.dataset.delay = minutes.toString();
+                        }
+                        for (const v of trainAdj[u]) {
+                            if (!visited.has(v)) {
+                                visited.add(v);
+                                queue.push(v);
+                            }
+                        }
+                    }
+
+                    if (delayExplanation) {
+                        const affected = Array.from(visited).map(i => trains[i].id);
+                        delayExplanation.textContent =
+                            `Because ${startId} is delayed by ${minutes} minutes, the following trains are (in this simple model) also affected on shared segments: ` +
+                            affected.join(", ") + ". This is like water flowing through pipes: delay pushes into connected trains until there is a big enough gap.";
+                    }
+                });
+            }
+
+            if (clearDelayBtn) {
+                clearDelayBtn.addEventListener("click", clearDelays);
+            }
+        })();
+
+        // ========== SECTION 5: DRAG & DROP ORDER ==========
+        (function setupDragAndDrop() {
+            const list = document.getElementById("drag-list");
+            const feedback = document.getElementById("drag-feedback");
+            const checkBtn = document.getElementById("check-drag-btn");
+            const resetBtn = document.getElementById("reset-drag-btn");
+            if (!list || !feedback) return;
+
+            let dragSrcEl = null;
+
+            function handleDragStart(e) {
+                dragSrcEl = this;
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", "");
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                this.classList.add("drag-over");
+            }
+
+            function handleDragLeave() {
+                this.classList.remove("drag-over");
+            }
+
+            function handleDrop(e) {
+                e.stopPropagation();
+                this.classList.remove("drag-over");
+                if (dragSrcEl && dragSrcEl !== this) {
+                    const children = Array.from(list.children);
+                    const srcIndex = children.indexOf(dragSrcEl);
+                    const targetIndex = children.indexOf(this);
+                    if (srcIndex > -1 && targetIndex > -1) {
+                        if (srcIndex < targetIndex) {
+                            list.insertBefore(dragSrcEl, this.nextSibling);
+                        } else {
+                            list.insertBefore(dragSrcEl, this);
+                        }
+                    }
+                }
+            }
+
+            function handleDragEnd() {
+                list.querySelectorAll(".drag-item").forEach(item => item.classList.remove("drag-over"));
+            }
+
+            function attachDragEvents() {
+                list.querySelectorAll(".drag-item").forEach(item => {
+                    item.addEventListener("dragstart", handleDragStart);
+                    item.addEventListener("dragover", handleDragOver);
+                    item.addEventListener("dragleave", handleDragLeave);
+                    item.addEventListener("drop", handleDrop);
+                    item.addEventListener("dragend", handleDragEnd);
+                });
+            }
+
+            attachDragEvents();
+
+            if (checkBtn) {
+                checkBtn.addEventListener("click", () => {
+                    const items = Array.from(list.children);
+                    let allCorrect = true;
+                    items.forEach(it => {
+                        const expected = parseInt(it.dataset.order, 10);
+                        const index = items.indexOf(it);
+                        it.classList.remove("drag-item-correct", "drag-item-wrong");
+                        if (index === expected) {
+                            it.classList.add("drag-item-correct");
+                        } else {
+                            it.classList.add("drag-item-wrong");
+                            allCorrect = false;
+                        }
+                    });
+                    if (allCorrect) {
+                        feedback.textContent = "✅ Beautiful. Your `oneMoreHop` procedure is in perfect order.";
+                        feedback.style.color = "#166534";
+                    } else {
+                        feedback.textContent = "Almost. Blocks in orange are out of place. Think about the high-level flow: copy → i loop → j loop → early continue → k loop → condition → return.";
+                        feedback.style.color = "#92400E";
+                    }
+                });
+            }
+
+            if (resetBtn) {
+                resetBtn.addEventListener("click", () => {
+                    const items = Array.from(list.children);
+                    items.forEach(it => {
+                        it.classList.remove("drag-item-correct", "drag-item-wrong");
+                    });
+                    // Shuffle
+                    for (let i = items.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        list.insertBefore(items[j], items[i]);
+                    }
+                    feedback.textContent = "";
+                });
+            }
+        })();
+
+        // ========== SECTION 6: PUZZLES PROGRESS ==========
+        (function setupPuzzles() {
+            const kolSecInput = document.getElementById("kol-sec-input");
+            const kolSecBtn = document.getElementById("check-kol-sec-btn");
+            const kolSecFb = document.getElementById("kol-sec-feedback");
+
+            if (kolSecBtn && kolSecInput && kolSecFb) {
+                kolSecBtn.addEventListener("click", () => {
+                    const val = parseInt(kolSecInput.value, 10);
+                    if (val === 1710) {
+                        kolSecFb.textContent = "✅ Correct! KOL → NAG → SEC is the shortest route in our current mini-world.";
+                        kolSecFb.style.color = "#166534";
+                    } else if (Number.isNaN(val)) {
+                        kolSecFb.textContent = "Type a number first. Try summing distances along a route like KOL→NAG→SEC.";
+                        kolSecFb.style.color = "#92400E";
+                    } else {
+                        kolSecFb.textContent = "Not that number. Hint: try summing distances along KOL→NAG→SEC.";
+                        kolSecFb.style.color = "#92400E";
+                    }
+                });
+            }
+
+            const secRouteInput = document.getElementById("sec-kan-route-input");
+            const secDistInput = document.getElementById("sec-kan-dist-input");
+            const secBtn = document.getElementById("check-sec-kan-btn");
+            const secFb = document.getElementById("sec-kan-feedback");
+
+            if (secBtn && secRouteInput && secDistInput && secFb) {
+                secBtn.addEventListener("click", () => {
+                    const route = secRouteInput.value.trim().toUpperCase();
+                    const dist = parseInt(secDistInput.value, 10);
+                    const containsStations =
+                        route.includes("SEC") &&
+                        route.includes("PUN") &&
+                        route.includes("DEL") &&
+                        route.includes("KAN");
+                    if (!containsStations) {
+                        secFb.textContent = "Check the stations in your route. One shortest route is SEC→PUN→DEL→KAN.";
+                        secFb.style.color = "#92400E";
+                        return;
+                    }
+                    if (dist === 2560) {
+                        secFb.textContent = "✅ Yes! SEC → PUN → DEL → KAN with total distance 2560 km is a valid shortest-distance route.";
+                        secFb.style.color = "#166534";
+                    } else {
+                        secFb.textContent = "Your stations look good, but the distance should be 600 + 1520 + 440 = 2560 km.";
+                        secFb.style.color = "#92400E";
+                    }
+                });
+            }
+
+            // Track puzzle completion when all three parts correct at least once
+            const puzzleMCQs = [
+                document.querySelector(".mcq[data-question='p1-q1']"),
+                document.querySelector(".mcq[data-question='p1-q2']")
+            ];
+
+            function checkPuzzleCompletion() {
+                let mcqOK = true;
+                puzzleMCQs.forEach(block => {
+                    if (!block) mcqOK = false;
+                    const correctInput = block ? block.querySelector("input[data-correct='true']") : null;
+                    if (!correctInput || !correctInput.checked) mcqOK = false;
+                });
+                const kolOK = kolSecFb && kolSecFb.textContent.startsWith("✅");
+                const secOK = secFb && secFb.textContent.startsWith("✅");
+                if (mcqOK && kolOK && secOK) {
+                    markComplete("puzzles");
+                }
+            }
+
+            // Attach listeners to MCQs to re-check
+            puzzleMCQs.forEach(block => {
+                if (!block) return;
+                block.querySelectorAll("input[type='radio']").forEach(inp => {
+                    inp.addEventListener("change", checkPuzzleCompletion);
+                });
+            });
+
+            if (kolSecBtn) kolSecBtn.addEventListener("click", checkPuzzleCompletion);
+            if (secBtn) secBtn.addEventListener("click", checkPuzzleCompletion);
+        })();
+
+        // ========== FINAL QUIZ ==========
+        (function setupFinalQuiz() {
+            const btn = document.getElementById("final-quiz-btn");
+            const resultBox = document.getElementById("final-quiz-result");
+            if (!btn || !resultBox) return;
+
+            btn.addEventListener("click", () => {
+                const finalBlocks = document.querySelectorAll(".mcq-final");
+                let score = 0;
+                let total = 0;
+                finalBlocks.forEach(block => {
+                    total++;
+                    const correctInput = block.querySelector("input[data-correct='true']");
+                    const feedback = block.querySelector(".mcq-feedback");
+                    if (correctInput && correctInput.checked) {
+                        score++;
+                        if (feedback && !feedback.textContent) {
+                            feedback.textContent = "✅ Correct!";
+                            feedback.style.color = "#166534";
+                        }
+                    } else {
+                        if (feedback && !feedback.textContent) {
+                            feedback.textContent = "You might want to peek back at that section.";
+                            feedback.style.color = "#92400E";
+                        }
+                    }
+                });
+
+                resultBox.classList.remove("hidden", "quiz-good", "quiz-ok", "quiz-bad");
+                let msg = "";
+                if (score === 5) {
+                    msg = `🔥 You’re a route-finding ninja. Week 10 concepts are solid. Score: ${score}/5`;
+                    resultBox.classList.add("quiz-good");
+                } else if (score >= 3) {
+                    msg = `✅ Good job! Revisit any section where you missed a question. Score: ${score}/5`;
+                    resultBox.classList.add("quiz-ok");
+                } else {
+                    msg = `No stress. Scroll back up, play with the matrices and graphs again, then retry. Score: ${score}/5`;
+                    resultBox.classList.add("quiz-bad");
+                }
+                resultBox.textContent = msg;
+
+                if (score >= 3) {
+                    markComplete("finalQuiz");
+                }
+            });
+        })();
+    </script>
 </body>
+
 </html>

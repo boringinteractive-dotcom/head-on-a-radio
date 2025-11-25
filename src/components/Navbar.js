@@ -52,9 +52,6 @@ export default function Navbar() {
               </svg>
             )}
           </button>
-          <Link href="/admin" className="nav-link small">
-            Sign in
-          </Link>
         </div>
       </div>
       <style jsx>{`

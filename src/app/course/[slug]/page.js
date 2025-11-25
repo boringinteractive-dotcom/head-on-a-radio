@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { getCourses } from "@/data/dataManager";
 import WeekTile from "@/components/WeekTile";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default function CoursePage({ params }) {
+  const resolvedParams = use(params);
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const courses = getCourses();
-    const foundCourse = courses.find(c => c.slug === params.slug);
+    const foundCourse = courses.find(c => c.slug === resolvedParams.slug);
     setCourse(foundCourse);
     setLoading(false);
-  }, [params.slug]);
+  }, [resolvedParams.slug]);
 
   if (loading) {
     return <div className="container section">Loading...</div>;

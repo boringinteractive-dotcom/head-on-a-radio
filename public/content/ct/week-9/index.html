@@ -626,6 +626,42 @@
                 font-size: 2rem;
             }
         }
+
+        /* Interactive Debugger Styles */
+        .pseudo-line {
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .pseudo-line.active {
+            background: var(--primary);
+            color: white;
+            border-left: 3px solid var(--secondary);
+            padding-left: calc(0.5rem - 3px);
+            font-weight: 600;
+            box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.4);
+        }
+
+        .matrix-cell-highlight {
+            background: var(--warning) !important;
+            color: white !important;
+            border: 2px solid var(--danger) !important;
+            animation: pulse 0.5s ease;
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
     </style>
 </head>
 
@@ -929,6 +965,109 @@
             </div>
         </section>
 
+        <section id="degrees-debugger">
+            <div class="card">
+                <span class="badge core">Pseudocode Challenge</span>
+                <h2>🎮 Interactive Debugger: Calculate All Degrees</h2>
+                <p>Step through this algorithm like a VSCode debugger! Watch as we calculate in-degree and out-degree
+                    for every node in a directed graph.</p>
+
+                <!-- Pseudocode Display -->
+                <div class="big-idea" style="margin-top: 1.5rem;">
+                    <strong>Algorithm:</strong> Given an adjacency matrix, calculate the in-degree (arrows pointing IN)
+                    and out-degree (arrows pointing OUT) for each node.
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+                    <!-- Code Panel -->
+                    <div
+                        style="background: var(--code-bg); border-radius: 16px; padding: 1.2rem; border: 1px solid var(--border);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                            <span
+                                style="font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em;">Pseudocode</span>
+                            <span id="deg-line-indicator"
+                                style="font-size: 0.75rem; color: var(--primary); font-weight: 600;"></span>
+                        </div>
+                        <div id="deg-code"
+                            style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1.7; color: var(--text-main);">
+                            <div class="pseudo-line" data-line="1">1. n = adjacency.length</div>
+                            <div class="pseudo-line" data-line="2">2. inDegree = [0, 0, 0, 0]</div>
+                            <div class="pseudo-line" data-line="3">3. outDegree = [0, 0, 0, 0]</div>
+                            <div class="pseudo-line" data-line="4">4. for i from 0 to n-1:</div>
+                            <div class="pseudo-line" data-line="5" style="padding-left: 1rem;">5. for j from 0 to n-1:
+                            </div>
+                            <div class="pseudo-line" data-line="6" style="padding-left: 2rem;">6. if adjacency[i][j] ==
+                                1:</div>
+                            <div class="pseudo-line" data-line="7" style="padding-left: 3rem;">7. outDegree[i] =
+                                outDegree[i] + 1</div>
+                            <div class="pseudo-line" data-line="8" style="padding-left: 3rem;">8. inDegree[j] =
+                                inDegree[j] + 1</div>
+                            <div class="pseudo-line" data-line="9">9. return inDegree, outDegree</div>
+                        </div>
+                    </div>
+
+                    <!-- Variables Panel -->
+                    <div
+                        style="background: var(--bg-body); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem;">
+                        <div
+                            style="font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.8rem;">
+                            Variables</div>
+                        <div id="deg-variables"
+                            style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2;">
+                            <div><span style="color: var(--primary);">n:</span> <span id="deg-var-n">-</span></div>
+                            <div><span style="color: var(--primary);">i:</span> <span id="deg-var-i">-</span></div>
+                            <div><span style="color: var(--primary);">j:</span> <span id="deg-var-j">-</span></div>
+                            <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border);">
+                                <div style="font-size: 0.7rem; color: var(--text-sub); margin-bottom: 0.3rem;">ARRAYS
+                                </div>
+                                <div><span style="color: var(--success);">inDegree:</span> <span
+                                        id="deg-in-array">-</span></div>
+                                <div><span style="color: var(--danger);">outDegree:</span> <span
+                                        id="deg-out-array">-</span></div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                            <div
+                                style="font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                                Execution Log</div>
+                            <div id="deg-log"
+                                style="font-size: 0.75rem; max-height: 100px; overflow-y: auto; color: var(--text-sub); line-height: 1.5;">
+                                <em>Ready to start...</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matrix Visualization -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div
+                        style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Adjacency Matrix</div>
+                    <table id="deg-matrix" style="width: auto; margin: 0 auto; font-size: 0.85rem;"></table>
+                </div>
+
+                <!-- Results Bar Chart -->
+                <div
+                    style="background: var(--bg-body); border-radius: 12px; padding: 1rem; border: 1px solid var(--border);">
+                    <div
+                        style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Results: Node Degrees</div>
+                    <div id="deg-results" style="display: flex; gap: 0.8rem; flex-wrap: wrap;"></div>
+                </div>
+
+                <!-- Controls -->
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 1.5rem;">
+                    <button class="btn" id="deg-step">▶ Step</button>
+                    <button class="btn btn-soft" id="deg-back">◀ Back</button>
+                    <button class="btn btn-soft" id="deg-reset">↻ Reset</button>
+                    <button class="btn btn-soft" id="deg-auto">▶▶ Auto</button>
+                    <div id="deg-status"
+                        style="margin-left: auto; font-size: 0.85rem; color: var(--text-sub); font-weight: 600;"></div>
+                </div>
+            </div>
+        </section>
+
         <section id="coherence">
             <div class="card">
                 <span class="badge application">Application</span>
@@ -1120,25 +1259,41 @@
 
                 // Draw Edges
                 ctx.strokeStyle = colorEdge;
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2.5;
                 this.edges.forEach(edge => {
                     const start = this.nodes[edge.from];
                     const end = this.nodes[edge.to];
+                    const nodeRadius = end.r || 20;
+
+                    // Calculate edge line length reduction to stop at node border
+                    const dx = end.x - start.x;
+                    const dy = end.y - start.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const ratio = (distance - nodeRadius - 5) / distance;
+                    const endX = start.x + dx * ratio;
+                    const endY = start.y + dy * ratio;
 
                     ctx.beginPath();
                     ctx.moveTo(start.x, start.y);
-                    ctx.lineTo(end.x, end.y);
+                    ctx.lineTo(endX, endY);
                     ctx.stroke();
 
                     if (this.type === 'directed') {
-                        // Draw Arrowhead
-                        const angle = Math.atan2(end.y - start.y, end.x - start.x);
+                        // Draw more prominent arrowhead
+                        const angle = Math.atan2(dy, dx);
+                        const arrowSize = 20;
+                        const arrowWidth = Math.PI / 5.5;
+
                         ctx.beginPath();
-                        ctx.moveTo(end.x - 15 * Math.cos(angle - Math.PI / 6), end.y - 15 * Math.sin(angle - Math.PI / 6));
-                        ctx.lineTo(end.x, end.y);
-                        ctx.lineTo(end.x - 15 * Math.cos(angle + Math.PI / 6), end.y - 15 * Math.sin(angle + Math.PI / 6));
+                        ctx.moveTo(endX - arrowSize * Math.cos(angle - arrowWidth), endY - arrowSize * Math.sin(angle - arrowWidth));
+                        ctx.lineTo(endX, endY);
+                        ctx.lineTo(endX - arrowSize * Math.cos(angle + arrowWidth), endY - arrowSize * Math.sin(angle + arrowWidth));
+                        ctx.closePath();
                         ctx.fillStyle = colorEdge;
                         ctx.fill();
+                        ctx.strokeStyle = colorEdge;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
                     }
                 });
 
@@ -1551,6 +1706,312 @@
             if (score === q.length) res.style.color = "var(--success)";
             else res.style.color = "var(--warning)";
         }
+
+        // ========== INTERACTIVE DEBUGGER: Calculate Degrees ==========
+        (function setupDegreesDebugger() {
+            // Sample adjacency matrix (4 nodes)
+            const adjacency = [
+                [0, 1, 0, 1],
+                [0, 0, 1, 0],
+                [1, 0, 0, 1],
+                [0, 1, 0, 0]
+            ];
+            const n = 4;
+            const nodeNames = ['A', 'B', 'C', 'D'];
+
+            // State
+            let currentStep = 0;
+            let executionHistory = [];
+            let autoInterval = null;
+
+            // Initialize
+            const initDebugger = () => {
+                executionHistory = [];
+                currentStep = 0;
+                buildExecutionSteps();
+                updateUI();
+            };
+
+            // Build all execution steps
+            const buildExecutionSteps = () => {
+                const steps = [];
+                const inDegree = [0, 0, 0, 0];
+                const outDegree = [0, 0, 0, 0];
+
+                // Step 0: Start
+                steps.push({
+                    line: 1,
+                    vars: { n: null, i: null, j: null },
+                    inDegree: [...inDegree],
+                    outDegree: [...outDegree],
+                    log: 'Starting algorithm...',
+                    highlight: null
+                });
+
+                // Step 1: n = 4
+                steps.push({
+                    line: 1,
+                    vars: { n: 4, i: null, j: null },
+                    inDegree: [...inDegree],
+                    outDegree: [...outDegree],
+                    log: 'Set n = 4 (number of nodes)',
+                    highlight: null
+                });
+
+                // Step 2: Initialize inDegree
+                steps.push({
+                    line: 2,
+                    vars: { n: 4, i: null, j: null },
+                    inDegree: [...inDegree],
+                    outDegree: [...outDegree],
+                    log: 'Created inDegree array [0, 0, 0, 0]',
+                    highlight: null
+                });
+
+                // Step 3: Initialize outDegree
+                steps.push({
+                    line: 3,
+                    vars: { n: 4, i: null, j: null },
+                    inDegree: [...inDegree],
+                    outDegree: [...outDegree],
+                    log: 'Created outDegree array [0, 0, 0, 0]',
+                    highlight: null
+                });
+
+                // Main loops
+                for (let i = 0; i < n; i++) {
+                    // Outer loop start
+                    steps.push({
+                        line: 4,
+                        vars: { n: 4, i: i, j: null },
+                        inDegree: [...inDegree],
+                        outDegree: [...outDegree],
+                        log: `Starting row i=${i} (Node ${nodeNames[i]})`,
+                        highlight: null
+                    });
+
+                    for (let j = 0; j < n; j++) {
+                        // Inner loop start
+                        steps.push({
+                            line: 5,
+                            vars: { n: 4, i: i, j: j },
+                            inDegree: [...inDegree],
+                            outDegree: [...outDegree],
+                            log: `Checking adjacency[${i}][${j}] (${nodeNames[i]}→${nodeNames[j]})`,
+                            highlight: { i, j }
+                        });
+
+                        // Check if edge exists
+                        steps.push({
+                            line: 6,
+                            vars: { n: 4, i: i, j: j },
+                            inDegree: [...inDegree],
+                            outDegree: [...outDegree],
+                            log: `adjacency[${i}][${j}] = ${adjacency[i][j]} ${adjacency[i][j] == 1 ? '✓ Edge exists!' : '✗ No edge'}`,
+                            highlight: { i, j }
+                        });
+
+                        if (adjacency[i][j] == 1) {
+                            // Update outDegree
+                            outDegree[i]++;
+                            steps.push({
+                                line: 7,
+                                vars: { n: 4, i: i, j: j },
+                                inDegree: [...inDegree],
+                                outDegree: [...outDegree],
+                                log: `Node ${nodeNames[i]} has an outgoing edge! outDegree[${i}] = ${outDegree[i]}`,
+                                highlight: { i, j }
+                            });
+
+                            // Update inDegree
+                            inDegree[j]++;
+                            steps.push({
+                                line: 8,
+                                vars: { n: 4, i: i, j: j },
+                                inDegree: [...inDegree],
+                                outDegree: [...outDegree],
+                                log: `Node ${nodeNames[j]} has an incoming edge! inDegree[${j}] = ${inDegree[j]}`,
+                                highlight: { i, j }
+                            });
+                        }
+                    }
+                }
+
+                // Return
+                steps.push({
+                    line: 9,
+                    vars: { n: 4, i: null, j: null },
+                    inDegree: [...inDegree],
+                    outDegree: [...outDegree],
+                    log: 'Algorithm complete! Returning degree arrays',
+                    highlight: null
+                });
+
+                executionHistory = steps;
+            };
+
+            // Render matrix
+            const renderMatrix = () => {
+                const table = document.getElementById('deg-matrix');
+                if (!table) return;
+
+                const state = executionHistory[currentStep];
+                table.innerHTML = '';
+
+                // Header row
+                const thead = document.createElement('tr');
+                thead.appendChild(document.createElement('th')); // Corner
+                for (let j = 0; j < n; j++) {
+                    const th = document.createElement('th');
+                    th.textContent = nodeNames[j];
+                    th.style.padding = '0.5rem';
+                    thead.appendChild(th);
+                }
+                table.appendChild(thead);
+
+                // Data rows
+                for (let i = 0; i < n; i++) {
+                    const row = document.createElement('tr');
+                    const rowHeader = document.createElement('th');
+                    rowHeader.textContent = nodeNames[i];
+                    rowHeader.style.padding = '0.5rem';
+                    row.appendChild(rowHeader);
+
+                    for (let j = 0; j < n; j++) {
+                        const cell = document.createElement('td');
+                        cell.textContent = adjacency[i][j];
+                        cell.id = `deg-cell-${i}-${j}`;
+                        cell.style.padding = '0.6rem';
+                        cell.style.textAlign = 'center';
+
+                        if (adjacency[i][j] == 1) {
+                            cell.style.background = 'rgba(var(--primary-rgb), 0.15)';
+                            cell.style.fontWeight = '600';
+                        }
+
+                        // Highlight current cell
+                        if (state.highlight && state.highlight.i === i && state.highlight.j === j) {
+                            cell.classList.add('matrix-cell-highlight');
+                        }
+
+                        row.appendChild(cell);
+                    }
+                    table.appendChild(row);
+                }
+            };
+
+            // Render results
+            const renderResults = () => {
+                const container = document.getElementById('deg-results');
+                if (!container) return;
+
+                const state = executionHistory[currentStep];
+                container.innerHTML = '';
+
+                for (let i = 0; i < n; i++) {
+                    const nodeCard = document.createElement('div');
+                    nodeCard.style.cssText = 'flex: 1; min-width: 140px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem;';
+
+                    nodeCard.innerHTML = `
+                        <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">${nodeNames[i]}</div>
+                        <div style="font-size: 0.75rem; color: var(--success); margin-bottom: 0.2rem;">
+                            ↓ In: <strong>${state.inDegree[i]}</strong>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--danger);">
+                            ↑ Out: <strong>${state.outDegree[i]}</strong>
+                        </div>
+                    `;
+                    container.appendChild(nodeCard);
+                }
+            };
+
+            // Update UI
+            const updateUI = () => {
+                const state = executionHistory[currentStep];
+
+                // Update line highlighting
+                document.querySelectorAll('#deg-code .pseudo-line').forEach(line => {
+                    line.classList.remove('active');
+                    if (parseInt(line.dataset.line) === state.line) {
+                        line.classList.add('active');
+                    }
+                });
+
+                // Update line indicator
+                const indicator = document.getElementById('deg-line-indicator');
+                if (indicator) indicator.textContent = `Line ${state.line}`;
+
+                // Update variables
+                document.getElementById('deg-var-n').textContent = state.vars.n !== null ? state.vars.n : '-';
+                document.getElementById('deg-var-i').textContent = state.vars.i !== null ? state.vars.i : '-';
+                document.getElementById('deg-var-j').textContent = state.vars.j !== null ? state.vars.j : '-';
+                document.getElementById('deg-in-array').textContent = JSON.stringify(state.inDegree);
+                document.getElementById('deg-out-array').textContent = JSON.stringify(state.outDegree);
+
+                // Update log
+                const log = document.getElementById('deg-log');
+                if (log) log.innerHTML = `<div style="color: var(--text-main);">${state.log}</div>`;
+
+                // Update status
+                const status = document.getElementById('deg-status');
+                if (status) status.textContent = `Step ${currentStep + 1} of ${executionHistory.length}`;
+
+                // Update buttons
+                document.getElementById('deg-back').disabled = currentStep === 0;
+                document.getElementById('deg-step').disabled = currentStep === executionHistory.length - 1;
+
+                // Render visualizations
+                renderMatrix();
+                renderResults();
+            };
+
+            // Event handlers
+            document.getElementById('deg-step')?.addEventListener('click', () => {
+                if (currentStep < executionHistory.length - 1) {
+                    currentStep++;
+                    updateUI();
+                }
+            });
+
+            document.getElementById('deg-back')?.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    currentStep--;
+                    updateUI();
+                }
+            });
+
+            document.getElementById('deg-reset')?.addEventListener('click', () => {
+                if (autoInterval) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                    document.getElementById('deg-auto').textContent = '▶▶ Auto';
+                }
+                initDebugger();
+            });
+
+            document.getElementById('deg-auto')?.addEventListener('click', function () {
+                if (autoInterval) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                    this.textContent = '▶▶ Auto';
+                } else {
+                    this.textContent = '⏸ Pause';
+                    autoInterval = setInterval(() => {
+                        if (currentStep < executionHistory.length - 1) {
+                            currentStep++;
+                            updateUI();
+                        } else {
+                            clearInterval(autoInterval);
+                            autoInterval = null;
+                            document.getElementById('deg-auto').textContent = '▶▶ Auto';
+                        }
+                    }, 700);
+                }
+            });
+
+            // Initialize
+            initDebugger();
+        })();
     </script>
 
 </body>

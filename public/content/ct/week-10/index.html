@@ -866,6 +866,49 @@
             color: var(--danger);
             border: 1px solid var(--danger);
         }
+
+        /* Interactive Debugger Styles */
+        .pseudo-line {
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .pseudo-line:hover {
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .pseudo-line.active {
+            background: var(--accent-soft);
+            border-left: 3px solid var(--accent);
+            padding-left: calc(0.5rem - 3px);
+            font-weight: 600;
+        }
+
+        .matrix-cell-highlight {
+            background: var(--warning-bg) !important;
+            border: 2px solid var(--warning) !important;
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .matrix-cell-updated {
+            background: var(--success-bg) !important;
+            color: var(--success) !important;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -1587,6 +1630,125 @@
    * Set `direct[i][j] = 1`.
 9. Return `direct` and `stationIndex`.</code></pre>
 
+                <div class="card" style="background: var(--accent-soft); margin-top: 1rem;">
+                    <h3 style="font-size: 1rem; color: var(--accent); margin-bottom: 0.8rem;">📖 Code-by-Code Analysis
+                    </h3>
+                    <div style="font-size: 0.9rem; line-height: 1.8;">
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 1:</strong> Create empty dictionary `stations = {}`
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Creates an empty dictionary to track all unique
+                                    stations.</p>
+                                <p><strong>Why:</strong> We need to discover all stations before we can build a matrix.
+                                    We use a dictionary because it automatically handles duplicates (each station name
+                                    appears only once as a key).</p>
+                                <p><strong>Example:</strong> <code>stations = {}</code> starts empty, ready to collect
+                                    station names.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 2:</strong> For each train, collect start and end stations
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Loops through every train in our dataset and extracts
+                                    the start and end station names.</p>
+                                <p><strong>Why:</strong> We need to know ALL stations before building our matrix. By
+                                    adding both start and end stations to our dictionary, we ensure no station is
+                                    missed.</p>
+                                <p><strong>Example:</strong> If train T1 goes Mumbai→Pune, we add both "Mumbai" and
+                                    "Pune" to <code>stations</code>.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 3:</strong> Let `n = number of keys in stations`
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Counts how many unique stations we found.</p>
+                                <p><strong>Why:</strong> This tells us the size of our matrix. If we have 5 stations, we
+                                    need a 5×5 matrix.</p>
+                                <p><strong>Example:</strong> If
+                                    <code>stations = {"Mumbai": true, "Pune": true, "Delhi": true}</code>, then
+                                    <code>n = 3</code>.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 4:</strong> Create `n × n` matrix `direct` filled with 0
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Creates a square matrix (same number of rows and
+                                    columns) with all values set to 0.</p>
+                                <p><strong>Why:</strong> We start with "no connections" (all 0s) and will add
+                                    connections (change to 1) as we process the trains. This is the adjacency matrix
+                                    foundation.</p>
+                                <p><strong>Example:</strong> For 3 stations: <code>[[0,0,0], [0,0,0], [0,0,0]]</code>
+                                </p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Steps 5-7:</strong> Map station names to matrix indices
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Assigns each station a number from 0 to n-1. This
+                                    creates a mapping from station names (like "Mumbai") to row/column indices (like 0).
+                                </p>
+                                <p><strong>Why:</strong> Matrices use numbers for indexing, not strings. We need to
+                                    convert "Mumbai" → 0, "Pune" → 1, etc.</p>
+                                <p><strong>Example:</strong>
+                                    <code>stationIndex = {"Mumbai": 0, "Pune": 1, "Delhi": 2}</code>
+                                </p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 8:</strong> Mark direct connections in the matrix
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> For each train, find the row index of its start
+                                    station and column index of its end station, then set that cell to 1.</p>
+                                <p><strong>Why:</strong> This encodes "there is a direct train from station i to station
+                                    j" as <code>direct[i][j] = 1</code>.</p>
+                                <p><strong>Example:</strong> If train goes Mumbai(0) → Pune(1), we set
+                                    <code>direct[0][1] = 1</code>.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details>
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 9:</strong> Return the results
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Sends back both the adjacency matrix and the
+                                    station-to-index mapping.</p>
+                                <p><strong>Why:</strong> We need both! The matrix shows connections, but we also need
+                                    <code>stationIndex</code> to know which row/column represents which station.
+                                </p>
+                                <p><strong>Result:</strong> Now we can ask "Is there a train from Mumbai to Delhi?" by
+                                    checking <code>direct[stationIndex["Mumbai"]][stationIndex["Delhi"]]</code>.</p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
                 <!-- withinOneHop -->
                 <h3>5.3 – Within-one-hop matrix</h3>
                 <span class="code-label">Procedure `withinOneHop(direct)`</span>
@@ -1602,6 +1764,200 @@ Output: `withinOne` = `n × n` 0/1 matrix
      * For each `k` from `0` to `n-1`:
        * If `direct[i][k] == 1` AND `direct[k][j] == 1`,
          then set `withinOne[i][j] = 1` and break out of the `k` loop.</code></pre>
+
+                <div class="card" style="background: var(--accent-soft); margin-top: 1rem;">
+                    <h3 style="font-size: 1rem; color: var(--accent); margin-bottom: 0.8rem;">📖 Code-by-Code Analysis
+                    </h3>
+                    <div style="font-size: 0.9rem; line-height: 1.8;">
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 1:</strong> Get matrix size
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Reads the number of rows (stations) from the input
+                                    matrix.</p>
+                                <p><strong>Why:</strong> We need to know how many stations we're working with to build
+                                    our output matrix of the same size.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 2:</strong> Create result matrix
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Creates a new n×n matrix filled with 0s.</p>
+                                <p><strong>Why:</strong> This will hold our result. We start assuming no connections and
+                                    will mark reachable pairs as 1.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 3a:</strong> Loop through all station pairs (i, j)
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> For every possible pair of stations (from station i to
+                                    station j), we check if j is reachable from i.</p>
+                                <p><strong>Why:</strong> We need to examine every possible journey to build the complete
+                                    reachability matrix.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 3b:</strong> Check for direct connection
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> If <code>direct[i][j] == 1</code>, copy that to
+                                    <code>withinOne[i][j] = 1</code>.
+                                </p>
+                                <p><strong>Why:</strong> Direct connections (0 hops) are also reachable within 1 hop. We
+                                    preserve all direct routes.</p>
+                                <p><strong>Example:</strong> If there's a direct train Mumbai→Delhi, that connection
+                                    stays in our result.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 3c:</strong> Search for one-hop paths (the magic!)
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> If no direct connection exists, try to find an
+                                    intermediate station k where:
+                                    <br>• There's a train from i to k (<code>direct[i][k] == 1</code>)
+                                    <br>• AND there's a train from k to j (<code>direct[k][j] == 1</code>)
+                                </p>
+                                <p><strong>Why:</strong> This finds <strong>one-hop paths</strong> (i → k → j). If we
+                                    can reach j from i by changing trains once, j is reachable within one hop.</p>
+                                <p><strong>Example:</strong> No direct Mumbai→Bangalore, but there's Mumbai→Pune and
+                                    Pune→Bangalore. So we set <code>withinOne[Mumbai][Bangalore] = 1</code>.</p>
+                                <p><strong>Optimization:</strong> We <code>break</code> as soon as we find one path
+                                    because we only care if it's reachable (yes/no), not how many paths exist.</p>
+                            </div>
+                        </details>
+
+                        <details>
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>🎯 Big Picture:</strong> What does this achieve?
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>Result:</strong> The <code>withinOne</code> matrix tells us which stations
+                                    are reachable with <strong>at most 1 train change</strong>.</p>
+                                <p><strong>Includes:</strong>
+                                    <br>• Direct connections (0 hops)
+                                    <br>• One-transfer journeys (1 hop)
+                                </p>
+                                <p><strong>Use case:</strong> "Show me all cities I can reach from Mumbai with at most
+                                    one train change" → Look at row Mumbai in <code>withinOne</code>.</p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- INTERACTIVE PSEUDOCODE DEBUGGER -->
+                <div class="card" style="margin-top: 2rem; background: var(--card);">
+                    <h3 style="color: var(--accent); margin-bottom: 0.5rem;">🎮 Interactive Debugger: withinOneHop</h3>
+                    <p class="subtext" style="margin-bottom: 1rem;">Step through the algorithm like a VSCode debugger!
+                        Watch variables change and see the matrix update in real-time.</p>
+
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <!-- Code Panel -->
+                        <div
+                            style="background: var(--code-bg); border-radius: 12px; padding: 1rem; border: 1px solid var(--border);">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                                <span
+                                    style="font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em;">Pseudocode</span>
+                                <span id="w1h-line-indicator"
+                                    style="font-size: 0.7rem; color: var(--accent); font-weight: 600;"></span>
+                            </div>
+                            <div id="w1h-code"
+                                style="font-family: 'SF Mono', monospace; font-size: 0.75rem; line-height: 1.6; color: var(--code-text);">
+                                <div class="pseudo-line" data-line="1">1. n = direct.length</div>
+                                <div class="pseudo-line" data-line="2">2. withinOne = [[0,0,0], [0,0,0], [0,0,0]]</div>
+                                <div class="pseudo-line" data-line="3">3. for i from 0 to n-1:</div>
+                                <div class="pseudo-line" data-line="4" style="padding-left: 1rem;">4. for j from 0 to
+                                    n-1:</div>
+                                <div class="pseudo-line" data-line="5" style="padding-left: 2rem;">5. if direct[i][j] ==
+                                    1:</div>
+                                <div class="pseudo-line" data-line="6" style="padding-left: 3rem;">6. withinOne[i][j] =
+                                    1</div>
+                                <div class="pseudo-line" data-line="7" style="padding-left: 2rem;">7. else:</div>
+                                <div class="pseudo-line" data-line="8" style="padding-left: 3rem;">8. for k from 0 to
+                                    n-1:</div>
+                                <div class="pseudo-line" data-line="9" style="padding-left: 4rem;">9. if direct[i][k]==1
+                                    AND direct[k][j]==1:</div>
+                                <div class="pseudo-line" data-line="10" style="padding-left: 5rem;">10. withinOne[i][j]
+                                    = 1</div>
+                                <div class="pseudo-line" data-line="11" style="padding-left: 5rem;">11. break</div>
+                                <div class="pseudo-line" data-line="12">12. return withinOne</div>
+                            </div>
+                        </div>
+
+                        <!-- Variables Panel -->
+                        <div
+                            style="background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;">
+                            <div
+                                style="font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.8rem;">
+                                Variables</div>
+                            <div id="w1h-variables"
+                                style="font-family: 'SF Mono', monospace; font-size: 0.8rem; line-height: 1.8;">
+                                <div><span style="color: var(--accent);">n:</span> <span id="var-n">-</span></div>
+                                <div><span style="color: var(--accent);">i:</span> <span id="var-i">-</span></div>
+                                <div><span style="color: var(--accent);">j:</span> <span id="var-j">-</span></div>
+                                <div><span style="color: var(--accent);">k:</span> <span id="var-k">-</span></div>
+                            </div>
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                                <div
+                                    style="font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                                    Execution Log</div>
+                                <div id="w1h-log"
+                                    style="font-size: 0.75rem; max-height: 120px; overflow-y: auto; color: var(--text-sub);">
+                                    <em>Ready to start...</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matrix Visualization -->
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <div
+                                    style="font-size: 0.75rem; color: var(--text-sub); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    Input: direct</div>
+                                <table id="w1h-direct-matrix" class="matrix-table"
+                                    style="width: 100%; font-size: 0.75rem;"></table>
+                            </div>
+                            <div>
+                                <div
+                                    style="font-size: 0.75rem; color: var(--text-sub); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    Output: withinOne</div>
+                                <table id="w1h-result-matrix" class="matrix-table"
+                                    style="width: 100%; font-size: 0.75rem;"></table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                        <button class="btn btn-sm" id="w1h-step">▶ Step</button>
+                        <button class="btn btn-sm btn-outline" id="w1h-back">◀ Back</button>
+                        <button class="btn btn-sm btn-outline" id="w1h-reset">↻ Reset</button>
+                        <button class="btn btn-sm btn-outline" id="w1h-auto">▶▶ Auto</button>
+                        <div id="w1h-status"
+                            style="margin-left: auto; font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">
+                        </div>
+                    </div>
+                </div>
 
                 <!-- withinTwoHops & oneMoreHop -->
                 <h3>5.4 – Two-hop & “one-more-hop”</h3>
@@ -1625,6 +1981,130 @@ Output: `withinOne` = `n × n` 0/1 matrix
      * If `nHop[i][k] == 1` AND `direct[k][j] == 1`,
        then set `nPlusOne[i][j] = 1` and break.
 4. Return `nPlusOne`.</code></pre>
+
+                <div class="card" style="background: var(--accent-soft); margin-top: 1rem;">
+                    <h3 style="font-size: 1rem; color: var(--accent); margin-bottom: 0.8rem;">📖 Code-by-Code Analysis
+                    </h3>
+                    <div style="font-size: 0.9rem; line-height: 1.8;">
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 1:</strong> Get matrix size
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Reads the number of stations from the input matrix.
+                                </p>
+                                <p><strong>Why:</strong> We need this to create the result matrix of the correct size.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 2:</strong> Copy `nHop` into `nPlusOne`
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Creates a new matrix by copying all existing
+                                    reachability from <code>nHop</code>.</p>
+                                <p><strong>Why:</strong> We want to <em>add</em> new reachable connections without
+                                    losing the old ones. If station j was reachable in n hops, it's definitely reachable
+                                    in n+1 hops too!</p>
+                                <p><strong>Think of it like:</strong> "Keep all the cities we could reach before, and
+                                    now let's find additional cities by taking one more train."</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 3a:</strong> Loop through all station pairs
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Examines every possible journey from station i to
+                                    station j.</p>
+                                <p><strong>Why:</strong> We need to check all pairs to build the complete reachability
+                                    picture.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 3b:</strong> Skip if already reachable
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> If <code>nPlusOne[i][j] == 1</code>, skip to the next
+                                    pair.</p>
+                                <p><strong>Why:</strong> Performance optimization! If we already know j is reachable
+                                    from i (from the copied matrix), there's no need to search for more paths.</p>
+                                <p><strong>Analogy:</strong> "If I already have a route to Bangalore, I don't need to
+                                    search for another one."</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 3c:</strong> Search for "one more hop" paths 🔥
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> For each intermediate station k, check if:
+                                    <br>• We can reach k from i in n hops: <code>nHop[i][k] == 1</code>
+                                    <br>• AND there's a direct train from k to j: <code>direct[k][j] == 1</code>
+                                </p>
+                                <p><strong>Why:</strong> This is the algorithm's heart! We're asking: "Can I reach j
+                                    from i by going to some intermediate city k (in n hops), then taking one direct
+                                    train from k to j?" If yes, j is reachable in n+1 hops.</p>
+                                <p><strong>Example:</strong>
+                                    <br>• Mumbai → Delhi is possible in 2 hops
+                                    <br>• Delhi → Bangalore has a direct train
+                                    <br>• Therefore: Mumbai → Bangalore is possible in 3 hops (2 + 1)
+                                </p>
+                                <p><strong>Key insight:</strong> We're building on previous results (<code>nHop</code>)
+                                    and extending them by one more direct connection.</p>
+                            </div>
+                        </details>
+
+                        <details style="margin-bottom: 0.8rem;">
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>Step 4:</strong> Return the result
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>What it does:</strong> Returns the updated reachability matrix.</p>
+                                <p><strong>Result:</strong> <code>nPlusOne[i][j] = 1</code> means "station j is
+                                    reachable from station i in at most n+1 hops".</p>
+                            </div>
+                        </details>
+
+                        <details>
+                            <summary
+                                style="cursor: pointer; font-weight: 600; color: var(--text-main); padding: 0.4rem 0;">
+                                <strong>🎯 The Power of Iteration</strong>
+                            </summary>
+                            <div style="padding-left: 1rem; margin-top: 0.4rem; color: var(--text-sub);">
+                                <p><strong>This is the magic:</strong> By calling <code>oneMoreHop</code> repeatedly, we
+                                    can find all reachable stations:</p>
+                                <ul style="margin-left: 1rem;">
+                                    <li>Start: <code>direct</code> (0 hops = direct trains only)</li>
+                                    <li>Call 1: <code>oneMoreHop(direct, direct)</code> → ≤1 hop</li>
+                                    <li>Call 2: <code>oneMoreHop(direct, oneHop)</code> → ≤2 hops</li>
+                                    <li>Call 3: <code>oneMoreHop(direct, twoHop)</code> → ≤3 hops</li>
+                                    <li>... keep going until no new connections are found</li>
+                                </ul>
+                                <p><strong>Real-world use:</strong> "Which cities can I reach from Mumbai with at most 3
+                                    train changes?" → Call <code>oneMoreHop</code> three times!</p>
+                                <p
+                                    style="margin-top: 0.8rem; padding: 0.6rem; background: var(--card); border-left: 3px solid var(--accent); border-radius: 4px;">
+                                    <strong>💡 Pro tip:</strong> This algorithm is essentially computing the
+                                    <strong>transitive closure</strong> of a graph - finding all indirect connections by
+                                    repeatedly extending paths.
+                                </p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
 
                 <div class="note-box">
                     <p>
@@ -2841,6 +3321,316 @@ Output: `withinOne` = `n × n` 0/1 matrix
                     markComplete("finalQuiz");
                 }
             });
+        })();
+
+        // ========== INTERACTIVE DEBUGGER: withinOneHop ==========
+        (function setupWithinOneHopDebugger() {
+            // Input matrix (3x3 example)
+            const directMatrix = [
+                [0, 1, 0],
+                [0, 0, 1],
+                [1, 0, 0]
+            ];
+            const n = 3;
+
+            // State
+            let currentStep = 0;
+            let executionHistory = [];
+            let autoInterval = null;
+
+            // Initialize
+            const initDebugger = () => {
+                executionHistory = [];
+                currentStep = 0;
+                buildExecutionSteps();
+                renderMatrices();
+                updateUI();
+            };
+
+            // Build all execution steps
+            const buildExecutionSteps = () => {
+                const steps = [];
+                const withinOne = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+
+                // Step 0: Initialize
+                steps.push({
+                    line: 1,
+                    vars: { n: null, i: null, j: null, k: null },
+                    withinOne: JSON.parse(JSON.stringify(withinOne)),
+                    log: 'Starting execution...',
+                    highlight: null
+                });
+
+                // Step 1: n = 3
+                steps.push({
+                    line: 1,
+                    vars: { n: 3, i: null, j: null, k: null },
+                    withinOne: JSON.parse(JSON.stringify(withinOne)),
+                    log: 'Set n = 3 (matrix size)',
+                    highlight: null
+                });
+
+                // Step 2: Create withinOne matrix
+                steps.push({
+                    line: 2,
+                    vars: { n: 3, i: null, j: null, k: null },
+                    withinOne: JSON.parse(JSON.stringify(withinOne)),
+                    log: 'Created withinOne matrix filled with 0s',
+                    highlight: null
+                });
+
+                // Main loops
+                for (let i = 0; i < n; i++) {
+                    // Enter i loop
+                    steps.push({
+                        line: 3,
+                        vars: { n: 3, i: i, j: null, k: null },
+                        withinOne: JSON.parse(JSON.stringify(withinOne)),
+                        log: `Starting outer loop with i=${i}`,
+                        highlight: null
+                    });
+
+                    for (let j = 0; j < n; j++) {
+                        // Enter j loop
+                        steps.push({
+                            line: 4,
+                            vars: { n: 3, i: i, j: j, k: null },
+                            withinOne: JSON.parse(JSON.stringify(withinOne)),
+                            log: `Inner loop: checking i=${i}, j=${j}`,
+                            highlight: { i, j }
+                        });
+
+                        // Check if direct[i][j] == 1
+                        steps.push({
+                            line: 5,
+                            vars: { n: 3, i: i, j: j, k: null },
+                            withinOne: JSON.parse(JSON.stringify(withinOne)),
+                            log: `Checking if direct[${i}][${j}] == 1? ${directMatrix[i][j] == 1 ? 'YES' : 'NO'}`,
+                            highlight: { i, j }
+                        });
+
+                        if (directMatrix[i][j] == 1) {
+                            // Direct connection found
+                            withinOne[i][j] = 1;
+                            steps.push({
+                                line: 6,
+                                vars: { n: 3, i: i, j: j, k: null },
+                                withinOne: JSON.parse(JSON.stringify(withinOne)),
+                                log: `Direct connection! Set withinOne[${i}][${j}] = 1`,
+                                highlight: { i, j }
+                            });
+                        } else {
+                            // Else: search for one-hop path
+                            steps.push({
+                                line: 7,
+                                vars: { n: 3, i: i, j: j, k: null },
+                                withinOne: JSON.parse(JSON.stringify(withinOne)),
+                                log: `No direct connection, searching for one-hop path...`,
+                                highlight: { i, j }
+                            });
+
+                            // k loop
+                            let found = false;
+                            for (let k = 0; k < n && !found; k++) {
+                                steps.push({
+                                    line: 8,
+                                    vars: { n: 3, i: i, j: j, k: k },
+                                    withinOne: JSON.parse(JSON.stringify(withinOne)),
+                                    log: `Trying intermediate station k=${k}`,
+                                    highlight: { i, j, k }
+                                });
+
+                                steps.push({
+                                    line: 9,
+                                    vars: { n: 3, i: i, j: j, k: k },
+                                    withinOne: JSON.parse(JSON.stringify(withinOne)),
+                                    log: `Check: direct[${i}][${k}]=${directMatrix[i][k]} AND direct[${k}][${j}]=${directMatrix[k][j]}`,
+                                    highlight: { i, j, k }
+                                });
+
+                                if (directMatrix[i][k] == 1 && directMatrix[k][j] == 1) {
+                                    // Found one-hop path
+                                    withinOne[i][j] = 1;
+                                    steps.push({
+                                        line: 10,
+                                        vars: { n: 3, i: i, j: j, k: k },
+                                        withinOne: JSON.parse(JSON.stringify(withinOne)),
+                                        log: `✓ One-hop path found! ${i}→${k}→${j}. Set withinOne[${i}][${j}] = 1`,
+                                        highlight: { i, j, k }
+                                    });
+
+                                    steps.push({
+                                        line: 11,
+                                        vars: { n: 3, i: i, j: j, k: k },
+                                        withinOne: JSON.parse(JSON.stringify(withinOne)),
+                                        log: `Breaking out of k loop`,
+                                        highlight: { i, j }
+                                    });
+                                    found = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Return
+                steps.push({
+                    line: 12,
+                    vars: { n: 3, i: null, j: null, k: null },
+                    withinOne: JSON.parse(JSON.stringify(withinOne)),
+                    log: 'Algorithm complete! Returning withinOne matrix',
+                    highlight: null
+                });
+
+                executionHistory = steps;
+            };
+
+            // Render matrices
+            const renderMatrices = () => {
+                const directTable = document.getElementById('w1h-direct-matrix');
+                const resultTable = document.getElementById('w1h-result-matrix');
+                if (!directTable || !resultTable) return;
+
+                // Render direct matrix
+                directTable.innerHTML = '';
+                for (let i = 0; i < n; i++) {
+                    const row = document.createElement('tr');
+                    for (let j = 0; j < n; j++) {
+                        const cell = document.createElement('td');
+                        cell.textContent = directMatrix[i][j];
+                        cell.id = `direct-${i}-${j}`;
+                        cell.style.padding = '0.4rem';
+                        cell.style.textAlign = 'center';
+                        if (directMatrix[i][j] == 1) {
+                            cell.style.background = 'var(--accent-soft)';
+                            cell.style.fontWeight = '600';
+                        }
+                        row.appendChild(cell);
+                    }
+                    directTable.appendChild(row);
+                }
+
+                // Render result matrix
+                const currentState = executionHistory[currentStep];
+                resultTable.innerHTML = '';
+                for (let i = 0; i < n; i++) {
+                    const row = document.createElement('tr');
+                    for (let j = 0; j < n; j++) {
+                        const cell = document.createElement('td');
+                        cell.textContent = currentState.withinOne[i][j];
+                        cell.id = `result-${i}-${j}`;
+                        cell.style.padding = '0.4rem';
+                        cell.style.textAlign = 'center';
+                        if (currentState.withinOne[i][j] == 1) {
+                            cell.classList.add('matrix-cell-updated');
+                        }
+                        row.appendChild(cell);
+                    }
+                    resultTable.appendChild(row);
+                }
+
+                // Highlight current cells
+                if (currentState.highlight) {
+                    const { i, j, k } = currentState.highlight;
+                    if (i !== undefined && j !== undefined) {
+                        const directCell = document.getElementById(`direct-${i}-${j}`);
+                        const resultCell = document.getElementById(`result-${i}-${j}`);
+                        if (directCell) directCell.classList.add('matrix-cell-highlight');
+                        if (resultCell) resultCell.classList.add('matrix-cell-highlight');
+                    }
+                    if (k !== undefined) {
+                        const d1 = document.getElementById(`direct-${i}-${k}`);
+                        const d2 = document.getElementById(`direct-${k}-${j}`);
+                        if (d1) d1.style.border = '2px dashed var(--warning)';
+                        if (d2) d2.style.border = '2px dashed var(--warning)';
+                    }
+                }
+            };
+
+            // Update UI
+            const updateUI = () => {
+                const state = executionHistory[currentStep];
+
+                // Update line highlighting
+                document.querySelectorAll('.pseudo-line').forEach(line => {
+                    line.classList.remove('active');
+                    if (parseInt(line.dataset.line) === state.line) {
+                        line.classList.add('active');
+                    }
+                });
+
+                // Update line indicator
+                const indicator = document.getElementById('w1h-line-indicator');
+                if (indicator) indicator.textContent = `Line ${state.line}`;
+
+                // Update variables
+                document.getElementById('var-n').textContent = state.vars.n !== null ? state.vars.n : '-';
+                document.getElementById('var-i').textContent = state.vars.i !== null ? state.vars.i : '-';
+                document.getElementById('var-j').textContent = state.vars.j !== null ? state.vars.j : '-';
+                document.getElementById('var-k').textContent = state.vars.k !== null ? state.vars.k : '-';
+
+                // Update log
+                const log = document.getElementById('w1h-log');
+                if (log) log.innerHTML = `<div style="color: var(--text-main);">${state.log}</div>`;
+
+                // Update status
+                const status = document.getElementById('w1h-status');
+                if (status) status.textContent = `Step ${currentStep + 1} of ${executionHistory.length}`;
+
+                // Update buttons
+                document.getElementById('w1h-back').disabled = currentStep === 0;
+                document.getElementById('w1h-step').disabled = currentStep === executionHistory.length - 1;
+
+                // Render matrices
+                renderMatrices();
+            };
+
+            // Event handlers
+            document.getElementById('w1h-step')?.addEventListener('click', () => {
+                if (currentStep < executionHistory.length - 1) {
+                    currentStep++;
+                    updateUI();
+                }
+            });
+
+            document.getElementById('w1h-back')?.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    currentStep--;
+                    updateUI();
+                }
+            });
+
+            document.getElementById('w1h-reset')?.addEventListener('click', () => {
+                if (autoInterval) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                    document.getElementById('w1h-auto').textContent = '▶▶ Auto';
+                }
+                initDebugger();
+            });
+
+            document.getElementById('w1h-auto')?.addEventListener('click', function () {
+                if (autoInterval) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                    this.textContent = '▶▶ Auto';
+                } else {
+                    this.textContent = '⏸ Pause';
+                    autoInterval = setInterval(() => {
+                        if (currentStep < executionHistory.length - 1) {
+                            currentStep++;
+                            updateUI();
+                        } else {
+                            clearInterval(autoInterval);
+                            autoInterval = null;
+                            document.getElementById('w1h-auto').textContent = '▶▶ Auto';
+                        }
+                    }, 800);
+                }
+            });
+
+            // Initialize
+            initDebugger();
         })();
     </script>
 </body>

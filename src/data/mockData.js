@@ -71,8 +71,8 @@ export const courses = [
             },
             {
                 weekNumber: 10,
-                title: "Week 10",
-                description: "Topics for Week 10.",
+                title: "Trains, Graphs & Shortest Paths",
+                description: "TTurn train routes into matrices and algorithms; explore hops, reachability, and shortest paths using real-world graph thinking.",
             },
             {
                 weekNumber: 11,

@@ -17,7 +17,7 @@ export default function Navbar() {
       <div className="container navbar-content">
         <div className="navbar-left">
           <Link href="/" className="logo">
-            WEEKWISE
+            TwoPlusTwoSeven
           </Link>
         </div>
         <div className="navbar-center">

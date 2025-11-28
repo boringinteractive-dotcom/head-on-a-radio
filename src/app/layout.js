@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "WEEKWISE",
-  description: "Learn Week by Week.",
+  title: "TwoPlusTwoSeven",
+  description: "Visual, interactive learning.",
 };
 
 export default function RootLayout({ children }) {

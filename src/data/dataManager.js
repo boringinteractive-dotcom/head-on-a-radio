@@ -1,7 +1,7 @@
 import { courses as defaultCourses } from './mockData';
 
 // Data management utilities for courses
-const STORAGE_KEY = 'weekwise_courses_v2';
+const STORAGE_KEY = 'twoplustwoseven_courses_v2';
 
 export function getCourses() {
     if (typeof window === 'undefined') return defaultCourses;

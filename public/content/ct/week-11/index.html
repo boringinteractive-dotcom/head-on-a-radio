@@ -1,33 +1,3602 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Content Coming Soon</title>
+    <meta charset="UTF-8" />
+    <title>TwoPlusTwoSeven – Week 11: DFS & Recursion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
         :root {
+            /* Apple-inspired Light Theme - matching site globals */
             --bg-color: #FFFFFF;
+            --card-bg: rgba(255, 255, 255, 0.8);
             --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent-color: #0071e3;
+            --accent-hover: #0077ED;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --danger-color: #ff3b30;
+            --success-color: #34c759;
+
+            /* Derived helpers */
+            --card-border: var(--border-color);
+            --bg: #f5f5f7;
+
+            /* Spacing - Apple's 4pt grid */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --space-3xl: 4rem;
+
+            /* Shadows - Apple's subtle depth */
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.16);
+
+            /* Glass effects */
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-blur: saturate(180%) blur(20px);
+
+            /* Typography - SF Pro */
             --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            --font-mono: "SF Mono", Monaco, "Cascadia Code", "Courier New", monospace;
+
+            /* Transitions - Apple's signature easing */
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+
+            /* Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
         }
+
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --card-bg: rgba(29, 29, 31, 0.72);
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --accent-color: #0a84ff;
+            --accent-hover: #409cff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --danger-color: #ff453a;
+            --success-color: #32d74b;
+
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.6);
+
+            --glass-bg: rgba(29, 29, 31, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
+            margin: 0;
+            font-family: var(--font-sans);
             background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: var(--font-sans);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
+            line-height: 1.47059;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.5s var(--ease-out), color 0.5s var(--ease-out);
+            min-height: 100vh;
         }
-        h1 {
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s var(--ease-out);
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .top-nav {
+            position: relative;
+            z-index: 10;
+            margin: 0 auto 2rem;
+            max-width: 95%;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-sm);
+        }
+
+
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--accent-color), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: none;
+            /* Hidden on mobile by default */
+        }
+
+        @media (min-width: 900px) {
+            .nav-links {
+                display: flex;
+            }
+        }
+
+        .nav-links a {
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+            background: #e5edff;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        #theme-toggle {
+            padding: 0.4rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            box-shadow: none;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        #theme-toggle:hover {
+            background: #e5edff;
+            color: var(--accent-color);
+            transform: rotate(15deg);
+        }
+
+        .progress-shell {
+            width: 120px;
+            background: var(--border-color);
+            border-radius: 999px;
+            overflow: hidden;
+            height: 8px;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), #a855f7);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(10, 132, 255, 0.3);
+        }
+
+        main {
+            padding: 2rem 1rem 5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 6rem;
+        }
+
+        .section h2 {
             font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 1rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            line-height: 1.1;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.04em;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 65ch;
+            margin-bottom: 2rem;
+        }
+
+        /* Interactive Elements */
+        button {
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            border: none;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s var(--ease-out);
+            box-shadow: 0 2px 8px rgba(10, 132, 255, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+            background: var(--accent-hover);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            box-shadow: none;
+        }
+
+        button.secondary:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Textarea styling */
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+            min-height: 200px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1);
+        }
+
+        [data-theme="dark"] textarea {
+            background: rgba(15, 23, 42, 0.5);
+            border-color: var(--border-color);
+        }
+
+        /* Visualisers & Code */
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        code {
+            font-family: var(--font-mono);
+            background: #e5edff;
+            color: var(--accent-color);
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Graph Visualizations */
+        .graph-box {
+            background: var(--bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        [data-theme="dark"] .graph-box {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .station-node circle {
+            fill: var(--card-bg);
+            stroke: var(--accent-color);
+            stroke-width: 2.5;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .station-node.visited circle {
+            fill: var(--accent-color);
+            stroke: var(--accent-color);
+        }
+
+        .station-node.current circle {
+            fill: #fff;
+            stroke: var(--accent-color);
+            stroke-width: 4;
+            filter: drop-shadow(0 0 8px var(--accent-color));
+        }
+
+        .station-node text {
+            font-size: 14px;
+            font-weight: 700;
+            fill: var(--text-primary);
+            font-family: var(--font-sans);
+            pointer-events: none;
+            text-shadow: 0 0 4px var(--bg-color);
+        }
+
+        [data-theme="dark"] .station-node text {
+            fill: var(--text-primary);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .station-edge {
+            stroke: var(--border-color);
+            stroke-width: 2;
+            transition: stroke 0.4s;
+        }
+
+        .station-edge.tree-edge {
+            stroke: var(--accent-color);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 4px rgba(10, 132, 255, 0.3));
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Floating Controls */
+        .controls-panel {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1rem;
+            width: fit-content;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .stagger-1 {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-2 {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-3 {
+            animation-delay: 0.3s;
+        }
+
+        /* Responsive Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* ---------- NEW / FIXED UTILITY STYLES ---------- */
+
+        .section-lead {
+            color: var(--text-secondary);
+            max-width: 60ch;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin: 0 0 1.5rem;
+        }
+
+        .section-inner {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .section-inner.reverse {
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr);
+        }
+
+        .hero-checklist {
+            align-self: stretch;
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 0.75rem 0 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .checklist input[type="checkbox"] {
+            margin-top: 0.15rem;
+        }
+
+        .muted {
+            color: var(--text-secondary);
+        }
+
+        .small {
+            font-size: 0.85rem;
+        }
+
+        .roadmap {
+            margin-top: 1.5rem;
+            padding: 1.2rem 1.4rem;
+            border-radius: var(--radius-md);
+            background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.16), transparent);
+            border: 1px solid var(--border-color);
+        }
+
+        .roadmap-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.8rem;
+        }
+
+        .roadmap-steps {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .roadmap-step {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .step-index {
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent-color), #a855f7);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.25);
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .controls-row label {
+            font-weight: 500;
+        }
+
+        select,
+        input[type="number"] {
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-primary);
+            padding: 0.4rem 0.6rem;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.9rem;
+        }
+
+        .panel {
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            padding: 0.75rem 0.9rem;
+        }
+
+        .stack-list,
+        .tag-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            font-size: 0.85rem;
+        }
+
+        .tag-list {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.65);
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        .stack-top {
             font-weight: 600;
         }
+
+        .visit-order {
+            margin-top: 0.4rem;
+            padding: 0.45rem 0.6rem;
+            border-radius: var(--radius-sm);
+            background: rgba(148, 163, 184, 0.08);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .mcq-card {
+            margin-top: 1.5rem;
+        }
+
+        .mcq-question {
+            margin-top: 0.75rem;
+            padding: 0.9rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: rgba(148, 163, 184, 0.04);
+        }
+
+        .mcq-options {
+            list-style: none;
+            margin: 0.5rem 0 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .mcq-options label {
+            cursor: pointer;
+        }
+
+        .mcq-feedback {
+            margin-top: 0.45rem;
+            min-height: 1.1em;
+            font-size: 0.85rem;
+        }
+
+        .mcq-correct {
+            border-color: var(--success-color);
+            box-shadow: 0 0 0 1px rgba(50, 215, 75, 0.4);
+        }
+
+        .mcq-incorrect {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 1px rgba(255, 69, 58, 0.35);
+        }
+
+        .qa summary {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .qa summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .qa summary::before {
+            content: '▸';
+            display: inline-block;
+            margin-right: 0.4rem;
+            transition: transform 0.2s var(--ease-out);
+        }
+
+        .qa[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .card-soft {
+            margin-top: 0.75rem;
+            padding: 0.9rem 1rem;
+            border-radius: var(--radius-md);
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .mentor-table,
+        .adj-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .mentor-table th,
+        .mentor-table td,
+        .adj-table th,
+        .adj-table td {
+            padding: 0.4rem 0.5rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .adj-table th {
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        .adj-table .current-row {
+            background: rgba(129, 140, 248, 0.18);
+        }
+
+        .two-cols {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .vertex-edge {
+            stroke: var(--border-color);
+            stroke-width: 2;
+            transition: stroke 0.3s var(--ease-out), stroke-width 0.3s var(--ease-out);
+        }
+
+        .vertex-edge.tree-edge {
+            stroke: var(--accent-color);
+            stroke-width: 3;
+        }
+
+        .vertex-node .node-circle {
+            fill: var(--card-bg);
+            stroke: var(--accent-color);
+            stroke-width: 2;
+            transition: all 0.25s var(--ease-out);
+        }
+
+        .vertex-node.visited .node-circle {
+            fill: var(--accent-color);
+            stroke: var(--accent-color);
+        }
+
+        .vertex-node.current .node-circle {
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.7));
+        }
+
+        .tiny-note {
+            margin-top: 0.35rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .student-chips,
+        .station-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .student-chip,
+        .station-chip {
+            border-radius: 999px;
+            padding: 0.2rem 0.7rem;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+        }
+
+        .station-chip.visited {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--accent-color);
+        }
+
+        .factorial-layout,
+        .listsum-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .final-quiz-footer {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .final-quiz-feedback {
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 900px) {
+
+            .section-inner,
+            .section-inner.reverse,
+            .two-cols,
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .top-nav {
+                margin-top: 0.75rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+        }
     </style>
+
 </head>
+
 <body>
-    <h1>This will be uploaded later</h1>
+    <header class="top-nav">
+        <div class="nav-left">
+            <div class="logo">TwoPlusTwoSeven</div>
+            <nav class="nav-links" aria-label="Week 11 sections">
+                <a href="#hero">Hero &amp; Roadmap</a>
+                <a href="#sec-dfs-train">DFS on Train Map</a>
+                <a href="#sec-trains-nodes">Trains as Nodes</a>
+                <a href="#sec-recursion">Recursion Deep Dive</a>
+                <a href="#sec-generic-dfs">DFS Pseudocode</a>
+                <a href="#sec-mentoring">Mentoring Graphs</a>
+                <a href="#sec-wrap">Wrap-Up + Quiz</a>
+            </nav>
+        </div>
+        <div class="nav-right" aria-label="Overall progress">
+            <button id="theme-toggle" aria-label="Toggle Dark Mode">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+            <span>Progress</span>
+            <div class="progress-shell" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                aria-label="Week 11 completion">
+                <div class="progress-fill" id="global-progress"></div>
+            </div>
+            <span class="progress-label" id="progress-label">0%</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- SECTION 1 – HERO & ROADMAP -->
+        <section id="hero" class="section">
+            <div class="section-inner">
+                <article class="card">
+                    <h1 class="hero-title">
+                        Week 11 – Depth-First Search &amp; Recursion: Going Deep in Graphs
+                    </h1>
+                    <div class="hero-subtitle">
+                        <p>We already know how to represent networks as graphs and matrices.</p>
+                        <p>This week we learn how computers <strong>explore</strong> these graphs step-by-step using
+                            <strong>depth-first search (DFS)</strong> and <strong>recursive procedures</strong>.
+                        </p>
+                        <p>We will meet DFS on train maps, on study-group graphs, and inside everyday functions like
+                            factorial and insertion sort.</p>
+                    </div>
+
+                    <div class="roadmap">
+                        <div class="roadmap-title">Week 11 Roadmap</div>
+                        <ol class="roadmap-steps">
+                            <li class="roadmap-step">
+                                <span class="step-index">1</span>
+                                <span>DFS idea on the train map (stations as nodes)</span>
+                            </li>
+                            <li class="roadmap-step">
+                                <span class="step-index">2</span>
+                                <span>DFS tree &amp; “seen” flags to avoid loops</span>
+                            </li>
+                            <li class="roadmap-step">
+                                <span class="step-index">3</span>
+                                <span>Trains as nodes + stations as edges (mutual recursion)</span>
+                            </li>
+                            <li class="roadmap-step">
+                                <span class="step-index">4</span>
+                                <span>Recursion deep dive – factorial, list sum, insertion sort</span>
+                            </li>
+                            <li class="roadmap-step">
+                                <span class="step-index">5</span>
+                                <span>Generic DFS pseudocode on an arbitrary graph</span>
+                            </li>
+                            <li class="roadmap-step">
+                                <span class="step-index">6</span>
+                                <span>DFS on mentoring graphs to find study cycles</span>
+                            </li>
+                        </ol>
+                    </div>
+                </article>
+
+                <aside class="card hero-checklist">
+                    <h3>By the end of Week 11 you’ll be able to…</h3>
+                    <p>Tick these off as you go. They all feed into the progress bar above.</p>
+                    <ul class="checklist">
+                        <li>
+                            <input type="checkbox" id="goal-1" data-progress-type="check" />
+                            <label for="goal-1">Explain in your own words what <strong>depth-first search (DFS)</strong>
+                                is.</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="goal-2" data-progress-type="check" />
+                            <label for="goal-2">Trace DFS on a small graph and write down the visit order.</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="goal-3" data-progress-type="check" />
+                            <label for="goal-3">Explain why we need a <strong>visited / seen</strong> dictionary in
+                                DFS.</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="goal-4" data-progress-type="check" />
+                            <label for="goal-4">Understand how DFS on trains can be written as <strong>mutual
+                                    recursion</strong> (visitStation / visitTrain).</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="goal-5" data-progress-type="check" />
+                            <label for="goal-5">Read simple <strong>recursive pseudocode</strong> (factorial, list sum,
+                                insertion sort).</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="goal-6" data-progress-type="check" />
+                            <label for="goal-6">Read and modify <strong>DFS pseudocode</strong> on an adjacency
+                                matrix.</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="goal-7" data-progress-type="check" />
+                            <label for="goal-7">See how DFS helps find <strong>study cycles</strong> in a mentoring
+                                graph.</label>
+                        </li>
+                    </ul>
+                </aside>
+            </div>
+        </section>
+
+        <!-- SECTION 2 – DFS ON THE TRAIN MAP -->
+        <section id="sec-dfs-train" class="section">
+            <h2>2. DFS on the Train Network (Stations as Nodes)</h2>
+            <p class="section-lead">
+                We explore the mini train world as a directed graph, then watch DFS run step-by-step with a live call
+                stack and visited set.
+            </p>
+
+            <div class="section-inner">
+                <article class="card">
+                    <p>We already know our train world as a <strong>directed graph</strong>:</p>
+                    <ul>
+                        <li>Each <strong>station</strong> is a node.</li>
+                        <li>Each <strong>train</strong> is a directed edge from its start station to its end station.
+                        </li>
+                    </ul>
+
+                    <p>Suppose we start at <strong>Kolkata (KOL)</strong> and we want to explore:</p>
+                    <blockquote>
+                        “Which stations are reachable if I keep following trains as long as I can?”
+                    </blockquote>
+
+                    <p>There are two natural strategies:</p>
+                    <ul>
+                        <li><strong>Breadth-first search (BFS):</strong><br />
+                            First visit <strong>all neighbours</strong> of KOL, then all stations at distance 2, then
+                            distance 3, and so on.
+                        </li>
+                        <li><strong>Depth-first search (DFS):</strong><br />
+                            From KOL, pick <strong>one neighbour</strong>, go there, then from there pick a neighbour,
+                            and keep going <strong>deeper and deeper</strong> until you get stuck.<br />
+                            Only then come back and try other choices.
+                        </li>
+                    </ul>
+
+                    <p>In DFS:</p>
+                    <ul>
+                        <li>We always <strong>follow one path as far as possible</strong> before backtracking.</li>
+                        <li>We must remember which nodes are already <strong>seen</strong>, so we don’t get stuck in
+                            loops.</li>
+                        <li>The edges we use when we first discover new nodes form a <strong>DFS tree</strong>.</li>
+                    </ul>
+
+                    <h3>Example DFS starting at KOL</h3>
+                    <p>Assume we always explore outgoing edges from a station in <strong>alphabetical order of station
+                            code</strong>: DEL, KAN, NAG, PUN, SEC (when applicable).</p>
+
+                    <div class="card-soft">
+                        <ol>
+                            <li>Start at <strong>KOL</strong>. Mark KOL as visited.</li>
+                            <li>Neighbours of KOL: DEL, KAN, NAG.<br />
+                                In alphabetical order: <strong>DEL</strong> first.</li>
+                            <li>Go to <strong>DEL</strong>, mark DEL visited.</li>
+                            <li>Neighbours of DEL: KAN.<br />
+                                Go to <strong>KAN</strong>, mark KAN visited.</li>
+                            <li>Neighbours of KAN: none.<br />
+                                DFS from KAN is done → backtrack to DEL.</li>
+                            <li>At DEL, there are no more unvisited neighbours → backtrack to KOL.</li>
+                            <li>At KOL, next neighbour is <strong>KAN</strong>, already visited → skip.</li>
+                            <li>Next neighbour: <strong>NAG</strong>. Go to NAG, mark NAG visited.</li>
+                            <li>From NAG, neighbour is <strong>SEC</strong> → visit SEC.</li>
+                            <li>From SEC, neighbour is <strong>PUN</strong> → visit PUN.</li>
+                            <li>From PUN, neighbour is DEL, but DEL is already visited → stop.</li>
+                            <li>Backtrack: PUN → SEC → NAG → KOL.</li>
+                        </ol>
+                        <p><strong>DFS visit order:</strong><br />
+                            <code>KOL → DEL → KAN → NAG → SEC → PUN</code>
+                        </p>
+                        <p>The edges that first discovered each new station form the <strong>DFS tree</strong> rooted at
+                            KOL.</p>
+                    </div>
+                </article>
+
+                <aside class="card">
+                    <h3>Interactive 2.1 – DFS Visualiser on Stations</h3>
+                    <p class="muted small">
+                        Uses the 6 stations and the 9 trains as a directed graph. Each train counts as one step.
+                    </p>
+
+                    <div class="graph-box">
+                        <svg viewBox="0 0 520 260" aria-labelledby="station-graph-title">
+                            <title id="station-graph-title">Train network – stations as nodes</title>
+                            <defs>
+                                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                    <polygon points="0 0, 8 3, 0 6" fill="#94a3b8"></polygon>
+                                </marker>
+                            </defs>
+
+                            <!-- edges -->
+                            <line id="edge-KOL-DEL" class="station-edge" x1="80" y1="130" x2="220" y2="70" />
+                            <line id="edge-KOL-KAN" class="station-edge" x1="80" y1="130" x2="220" y2="200" />
+                            <line id="edge-KOL-NAG" class="station-edge" x1="80" y1="130" x2="220" y2="30" />
+                            <line id="edge-NAG-SEC" class="station-edge" x1="220" y1="30" x2="360" y2="30" />
+                            <line id="edge-SEC-PUN" class="station-edge" x1="360" y1="30" x2="480" y2="130" />
+                            <line id="edge-PUN-DEL" class="station-edge" x1="480" y1="130" x2="220" y2="70" />
+                            <line id="edge-DEL-KAN" class="station-edge" x1="220" y1="70" x2="220" y2="200" />
+
+                            <!-- nodes -->
+                            <g class="station-node" data-station-node="KOL">
+                                <circle cx="80" cy="130" r="20"></circle>
+                                <text x="80" y="133" text-anchor="middle">KOL</text>
+                            </g>
+                            <g class="station-node" data-station-node="NAG">
+                                <circle cx="220" cy="30" r="20"></circle>
+                                <text x="220" y="33" text-anchor="middle">NAG</text>
+                            </g>
+                            <g class="station-node" data-station-node="DEL">
+                                <circle cx="220" cy="70" r="20"></circle>
+                                <text x="220" y="73" text-anchor="middle">DEL</text>
+                            </g>
+                            <g class="station-node" data-station-node="KAN">
+                                <circle cx="220" cy="200" r="20"></circle>
+                                <text x="220" y="203" text-anchor="middle">KAN</text>
+                            </g>
+                            <g class="station-node" data-station-node="SEC">
+                                <circle cx="360" cy="30" r="20"></circle>
+                                <text x="360" y="33" text-anchor="middle">SEC</text>
+                            </g>
+                            <g class="station-node" data-station-node="PUN">
+                                <circle cx="480" cy="130" r="20"></circle>
+                                <text x="480" y="133" text-anchor="middle">PUN</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="controls-row">
+                        <label for="dfs-station-start">Start station:</label>
+                        <select id="dfs-station-start">
+                            <option value="KOL">KOL</option>
+                            <option value="DEL">DEL</option>
+                            <option value="KAN">KAN</option>
+                            <option value="NAG">NAG</option>
+                            <option value="SEC">SEC</option>
+                            <option value="PUN">PUN</option>
+                        </select>
+                    </div>
+                    <div class="controls-row">
+                        <button id="dfs-station-run">Run DFS step-by-step</button>
+                        <button id="dfs-station-next" class="secondary" disabled>Next step</button>
+                    </div>
+
+                    <div class="panel-grid">
+                        <div class="panel">
+                            <h4>Call stack</h4>
+                            <ul id="dfs-station-stack" class="stack-list">
+                                <li>(empty)</li>
+                            </ul>
+                        </div>
+                        <div class="panel">
+                            <h4>Visited stations</h4>
+                            <ul id="dfs-station-visited" class="tag-list">
+                                <li class="small muted">(none)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top:0.6rem;">
+                        <h4>DFS visit order</h4>
+                        <div id="dfs-station-order" class="visit-order small muted">(no steps yet)</div>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="card mcq-card">
+                <h3>Mini MCQ: DFS vs BFS</h3>
+
+                <!-- Q1 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="instant" data-correct-option="B"
+                    data-hint="Hint: Look back at the step-by-step DFS example from KOL.">
+                    <p><strong>Q1:</strong> In DFS from KOL, why don’t we immediately visit all neighbours of KOL?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="s2-q1" id="s2-q1-A" value="A" />
+                            <label for="s2-q1-A">(A) Because DFS is only allowed to visit one neighbour.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q1" id="s2-q1-B" value="B" />
+                            <label for="s2-q1-B">(B) Because DFS follows <strong>one path deeply</strong> before trying
+                                other neighbours.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q1" id="s2-q1-C" value="C" />
+                            <label for="s2-q1-C">(C) Because there is only one neighbour in this graph.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q1" id="s2-q1-D" value="D" />
+                            <label for="s2-q1-D">(D) Because BFS already visited them.</label>
+                        </li>
+                    </ul>
+                    <div class="mcq-feedback" aria-live="polite"></div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="instant" data-correct-option="B"
+                    data-hint="Hint: Think about avoiding loops when there are cycles in the graph.">
+                    <p><strong>Q2:</strong> What is the role of the <strong>visited / seen</strong> set in DFS?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="s2-q2" id="s2-q2-A" value="A" />
+                            <label for="s2-q2-A">(A) To count how many edges were used.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q2" id="s2-q2-B" value="B" />
+                            <label for="s2-q2-B">(B) To avoid revisiting the same node and getting stuck in
+                                cycles.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q2" id="s2-q2-C" value="C" />
+                            <label for="s2-q2-C">(C) To sort the nodes alphabetically.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q2" id="s2-q2-D" value="D" />
+                            <label for="s2-q2-D">(D) To store distances between nodes.</label>
+                        </li>
+                    </ul>
+                    <div class="mcq-feedback" aria-live="polite"></div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="instant" data-correct-option="C"
+                    data-hint="Hint: Check the DFS visit order for the example starting at KOL.">
+                    <p><strong>Q3:</strong> In our example DFS from KOL (with alphabetical neighbour order), which
+                        station is visited <strong>second</strong>?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="s2-q3" id="s2-q3-A" value="A" />
+                            <label for="s2-q3-A">(A) KAN</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q3" id="s2-q3-B" value="B" />
+                            <label for="s2-q3-B">(B) NAG</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q3" id="s2-q3-C" value="C" />
+                            <label for="s2-q3-C">(C) DEL</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="s2-q3" id="s2-q3-D" value="D" />
+                            <label for="s2-q3-D">(D) SEC</label>
+                        </li>
+                    </ul>
+                    <div class="mcq-feedback" aria-live="polite"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 – TRAINS AS NODES & MUTUAL RECURSION -->
+        <section id="sec-trains-nodes" class="section">
+            <h2>3. Trains as Nodes &amp; Stations as Edges – Mutual Recursion</h2>
+
+            <div class="section-inner reverse">
+                <article class="card">
+                    <p>In the previous section, <strong>stations were nodes</strong> and <strong>trains were
+                            edges</strong>.</p>
+                    <p>But sometimes it is more natural to think of:</p>
+                    <ul>
+                        <li><strong>Nodes = trains</strong> (T1, T2, …, T9)</li>
+                        <li><strong>Edge between two trains</strong> if they share a station where you can transfer.
+                        </li>
+                    </ul>
+                    <p>We can simplify and say:</p>
+                    <blockquote>
+                        Two trains are connected if they share at least one station among their <strong>start or
+                            end</strong> stations.
+                    </blockquote>
+                    <p>Example connections:</p>
+                    <ul>
+                        <li>T1 and T2 share both KOL and NAG.</li>
+                        <li>T1 and T3 share NAG.</li>
+                        <li>T6 and T7 share KOL and DEL.</li>
+                        <li>T6 and T8 share DEL.</li>
+                    </ul>
+                    <p>If we start on some train, say <strong>T1</strong>, we might want to know:</p>
+                    <blockquote>
+                        “Which other trains are reachable if I keep changing trains whenever they share a station?”
+                    </blockquote>
+                    <p>To explore this “train graph”, it is convenient to write <strong>two recursive
+                            procedures</strong>:</p>
+                    <ul>
+                        <li><code>visitTrain(trainId)</code></li>
+                        <li><code>visitStation(stationCode)</code></li>
+                    </ul>
+                    <p>They will <strong>call each other</strong>:</p>
+                    <ul>
+                        <li><code>visitTrain</code> marks a train as seen and then calls <code>visitStation</code> on
+                            all stations it touches.</li>
+                        <li><code>visitStation</code> looks at all trains that use that station and calls
+                            <code>visitTrain</code> on trains not seen yet.
+                        </li>
+                    </ul>
+                    <p>This is called <strong>mutual recursion</strong>:</p>
+                    <ul>
+                        <li>A calls B, B calls A, and so on.</li>
+                        <li>We must still keep track of <strong>visited trains</strong> and <strong>visited
+                                stations</strong> so that the recursion eventually stops.</li>
+                    </ul>
+
+                    <h3>Pseudocode – mutual DFS for trains &amp; stations</h3>
+                    <pre><code>Data we keep:
+
+* seenTrain: dictionary from train id → boolean (initially all false)
+* seenStation: dictionary from station code → boolean (initially all false)
+* For each train T, we know:
+    * startStation[T]
+    * endStation[T]
+
+Procedure visitTrain(T)
+1. If seenTrain[T] is true, return.
+2. Set seenTrain[T] = true.
+3. Let s = startStation[T], e = endStation[T].
+4. Call visitStation(s).
+5. Call visitStation(e).
+
+Procedure visitStation(S)
+1. If seenStation[S] is true, return.
+2. Set seenStation[S] = true.
+3. For each train U such that startStation[U] = S or endStation[U] = S:
+    * Call visitTrain(U).</code></pre>
+                </article>
+
+                <aside class="card">
+                    <h3>Interactive 3.1 – Train Connection Explorer</h3>
+                    <p class="muted small">
+                        Trains T1..T9 are nodes. Two trains are connected if they share a start or end station.
+                    </p>
+
+                    <div class="graph-box">
+                        <div class="train-grid" aria-label="Trains as nodes">
+                            <div class="train-node" data-train-node="T1">T1</div>
+                            <div class="train-node" data-train-node="T2">T2</div>
+                            <div class="train-node" data-train-node="T3">T3</div>
+                            <div class="train-node" data-train-node="T4">T4</div>
+                            <div class="train-node" data-train-node="T5">T5</div>
+                            <div class="train-node" data-train-node="T6">T6</div>
+                            <div class="train-node" data-train-node="T7">T7</div>
+                            <div class="train-node" data-train-node="T8">T8</div>
+                            <div class="train-node" data-train-node="T9">T9</div>
+                        </div>
+                        <div class="tiny-note">
+                            Trains that share stations are connected in the underlying graph. DFS explores all reachable
+                            trains.
+                        </div>
+                        <div class="station-chip-row">
+                            <span class="station-chip" data-station-chip="KOL">KOL</span>
+                            <span class="station-chip" data-station-chip="NAG">NAG</span>
+                            <span class="station-chip" data-station-chip="DEL">DEL</span>
+                            <span class="station-chip" data-station-chip="PUN">PUN</span>
+                            <span class="station-chip" data-station-chip="SEC">SEC</span>
+                            <span class="station-chip" data-station-chip="KAN">KAN</span>
+                        </div>
+                    </div>
+
+                    <div class="controls-row">
+                        <label for="mutual-start-train">Start from train:</label>
+                        <select id="mutual-start-train">
+                            <option value="T1">T1</option>
+                            <option value="T2">T2</option>
+                            <option value="T3">T3</option>
+                            <option value="T4">T4</option>
+                            <option value="T5">T5</option>
+                            <option value="T6">T6</option>
+                            <option value="T7">T7</option>
+                            <option value="T8">T8</option>
+                            <option value="T9">T9</option>
+                        </select>
+                    </div>
+                    <div class="controls-row">
+                        <button id="mutual-run">Run mutual DFS</button>
+                        <button id="mutual-next" class="secondary" disabled>Next step</button>
+                    </div>
+
+                    <div class="panel-grid">
+                        <div class="panel">
+                            <h4>Call stack</h4>
+                            <ul id="mutual-stack" class="stack-list">
+                                <li>(empty)</li>
+                            </ul>
+                        </div>
+                        <div class="panel">
+                            <h4>Seen trains</h4>
+                            <ul id="mutual-seen-trains" class="tag-list">
+                                <li class="small muted">(none)</li>
+                            </ul>
+                        </div>
+                        <div class="panel">
+                            <h4>Seen stations</h4>
+                            <ul id="mutual-seen-stations" class="tag-list">
+                                <li class="small muted">(none)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-top:0.6rem;">
+                        <h4>Reachable trains (first-visit order)</h4>
+                        <div id="mutual-order" class="visit-order small muted">(no run yet)</div>
+                    </div>
+                </aside>
+            </div>
+
+            <details class="qa">
+                <summary>Quick question: Why two “seen” dictionaries?</summary>
+                <div class="card">
+                    <p><strong>Q:</strong> Why do we need both <code>seenTrain</code> and <code>seenStation</code>?</p>
+                    <p><strong>Answer:</strong></p>
+                    <ul>
+                        <li>To avoid calling <code>visitTrain</code> again on the same train.</li>
+                        <li>To avoid calling <code>visitStation</code> again on the same station.</li>
+                        <li>Without these dictionaries, <code>visitTrain</code> and <code>visitStation</code> could
+                            bounce between the same train and station forever.</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+
+        <!-- SECTION 4 – RECURSION DEEP DIVE -->
+        <section id="sec-recursion" class="section">
+            <h2>4. Recursion as a General Idea</h2>
+            <p class="section-lead">
+                DFS procedures are recursive: they call themselves on smaller subproblems. Here we zoom in on recursion
+                itself.
+            </p>
+
+            <article class="card">
+                <p>Our DFS procedures are <strong>recursive</strong>: they call themselves (directly or via mutual
+                    recursion) on <strong>smaller subproblems</strong>.</p>
+                <p>Recursion is based on <strong>inductive definitions</strong>:</p>
+                <ul>
+                    <li>A <strong>base case</strong> where we know the answer directly.</li>
+                    <li>An <strong>inductive step</strong> where we solve a problem in terms of <strong>smaller versions
+                            of itself</strong>.</li>
+                </ul>
+                <p>We will look at three classic examples:</p>
+                <ol>
+                    <li>Factorial of a number.</li>
+                    <li>Sum of a list.</li>
+                    <li>Recursive insertion sort.</li>
+                </ol>
+            </article>
+
+            <!-- 4.1 Factorial -->
+            <article class="card" style="margin-top:1rem;">
+                <h3>4.1 – Factorial</h3>
+                <p>The factorial of a natural number <code>n</code> is:</p>
+                <ul>
+                    <li><code>n! = n × (n−1) × (n−2) × … × 2 × 1</code></li>
+                    <li><code>0!</code> is defined to be <code>1</code>.</li>
+                </ul>
+                <p>One way to think of <code>n!</code>:</p>
+                <blockquote>It is the number of different ways to arrange <code>n</code> students in a line.
+                </blockquote>
+                <p>Inductive definition:</p>
+                <ul>
+                    <li><strong>Base case:</strong> <code>0! = 1</code></li>
+                    <li><strong>Inductive step:</strong> <code>n! = n × (n−1)!</code> for <code>n &gt; 0</code></li>
+                </ul>
+                <p>We translate this into a <strong>recursive procedure</strong>:</p>
+                <pre><code>procedure factorial(n):
+    if n == 0:
+        return 1
+    else:
+        return n * factorial(n - 1)</code></pre>
+                <p>When we call <code>factorial(3)</code>:</p>
+                <ul>
+                    <li><code>factorial(3)</code> suspends until it knows <code>factorial(2)</code></li>
+                    <li><code>factorial(2)</code> suspends until it knows <code>factorial(1)</code></li>
+                    <li><code>factorial(1)</code> suspends until it knows <code>factorial(0)</code></li>
+                    <li><code>factorial(0)</code> hits the base case and returns <code>1</code></li>
+                    <li>Then the calls resume in reverse:
+                        <ul>
+                            <li><code>factorial(1)</code> returns <code>1 × 1 = 1</code></li>
+                            <li><code>factorial(2)</code> returns <code>2 × 1 = 2</code></li>
+                            <li><code>factorial(3)</code> returns <code>3 × 2 = 6</code></li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>The computer keeps a <strong>call stack</strong> of suspended calls until it reaches the base case.
+                </p>
+
+                <div class="card-soft" style="margin-top: 1rem;">
+                    <h4>🧠 Deep Dive: What is a Stack Frame?</h4>
+                    <p>When a function calls another function (or itself), the computer creates a <strong>Stack
+                            Frame</strong> in memory.</p>
+                    <p>This frame stores:</p>
+                    <ul>
+                        <li>The function's arguments (e.g., <code>n=3</code>).</li>
+                        <li>Local variables.</li>
+                        <li>The <strong>return address</strong> (where to go back to when finished).</li>
+                    </ul>
+                    <p>These frames pile up like a stack of plates. The one on top is the <strong>active</strong> one.
+                        When it returns, it is popped off, and we resume the one below it.</p>
+                </div>
+
+                <p>Also note:</p>
+                <div class="card-soft">
+                    <p>If we mistakenly call <code>factorial(−1)</code> with this definition:</p>
+                    <ul>
+                        <li><code>factorial(−1)</code> calls <code>factorial(−2)</code></li>
+                        <li><code>factorial(−2)</code> calls <code>factorial(−3)</code></li>
+                        <li>… and so on, never reaching <code>0</code>.</li>
+                    </ul>
+                    <p>Without a base case that is actually reachable, the recursion <strong>never terminates</strong>.
+                    </p>
+                </div>
+
+                <div style="margin-top:0.9rem;">
+                    <h4>Interactive 4.2 – Factorial Call Stack Visualiser</h4>
+                    <p class="muted small">
+                        Choose <code>n</code>, then step through the recursive calls and returns.
+                    </p>
+
+                    <div class="controls-row">
+                        <label for="factorial-input">n (0 to 7):</label>
+                        <input type="number" id="factorial-input" min="0" max="7" value="3" />
+                        <button id="factorial-run">Visualise factorial(n)</button>
+                        <button id="factorial-next" class="secondary" disabled>Next step</button>
+                    </div>
+
+                    <div class="factorial-layout">
+                        <div class="panel">
+                            <h4>Call stack</h4>
+                            <ul id="factorial-stack" class="stack-list">
+                                <li>(empty)</li>
+                            </ul>
+                        </div>
+                        <div class="panel">
+                            <h4>Returns</h4>
+                            <ul id="factorial-returns" class="stack-list"></ul>
+                        </div>
+                    </div>
+                    <div id="factorial-warning" class="warning" aria-live="polite"></div>
+                </div>
+            </article>
+
+            <!-- 4.3 Sum of a list -->
+            <article class="card" style="margin-top:1rem;">
+                <h3>4.3 – Sum of a List (Recursive)</h3>
+                <p>For lists, the natural “nothing” value is the <strong>empty list</strong>.</p>
+                <p>We define the sum of a list of numbers recursively:</p>
+                <ul>
+                    <li><strong>Base case:</strong><br />
+                        If the list is empty, the sum is 0.</li>
+                    <li><strong>Inductive step:</strong><br />
+                        If the list is not empty, take the <strong>first element</strong> and add it to the sum of the
+                        <strong>rest</strong> of the list.
+                    </li>
+                </ul>
+                <p>Pseudocode:</p>
+                <pre><code>procedure listSum(L):
+    if L is empty:
+        return 0
+    else:
+        return first(L) + listSum(rest(L))</code></pre>
+                <p>Example on <code>[1, 2, 3, 4]</code>:</p>
+                <ul>
+                    <li><code>listSum([1,2,3,4]) = 1 + listSum([2,3,4])</code></li>
+                    <li><code>listSum([2,3,4]) = 2 + listSum([3,4])</code></li>
+                    <li><code>listSum([3,4]) = 3 + listSum([4])</code></li>
+                    <li><code>listSum([4]) = 4 + listSum([])</code></li>
+                    <li><code>listSum([]) = 0</code> (base case)</li>
+                    <li>So total = <code>1 + 2 + 3 + 4 + 0 = 10</code>.</li>
+                </ul>
+
+                <div style="margin-top:0.8rem;">
+                    <h4>Interactive 4.4 – Recursive List Sum Stepper</h4>
+                    <p class="muted small">
+                        Choose a list, then follow the recursive expansion and returns.
+                    </p>
+
+                    <div class="controls-row">
+                        <label for="listsum-select">List:</label>
+                        <select id="listsum-select">
+                            <option value="3,5">[3, 5]</option>
+                            <option value="2,4,6">[2, 4, 6]</option>
+                            <option value="1,2,3,4">[1, 2, 3, 4]</option>
+                        </select>
+                        <button id="listsum-run">Run listSum</button>
+                        <button id="listsum-next" class="secondary" disabled>Next step</button>
+                    </div>
+
+                    <div class="listsum-layout">
+                        <div class="panel">
+                            <h4>Call stack</h4>
+                            <ul id="listsum-stack" class="stack-list">
+                                <li>(empty)</li>
+                            </ul>
+                        </div>
+                        <div class="panel">
+                            <h4>Expansion &amp; returns</h4>
+                            <ul id="listsum-log" class="stack-list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 4.5 Insertion sort idea -->
+            <article class="card" style="margin-top:1rem;">
+                <h3>4.5 – Recursive Insertion Sort (Idea Only)</h3>
+                <p>We can also write <strong>insertion sort</strong> recursively.</p>
+                <p>Idea:</p>
+                <ul>
+                    <li>Any list of length 0 or 1 is already sorted.</li>
+                    <li>For a longer list:
+                        <ol>
+                            <li>Take the first element <code>x</code>.</li>
+                            <li>Recursively sort the <strong>rest</strong> of the list.</li>
+                            <li>Insert <code>x</code> into the correct position in the sorted rest.</li>
+                        </ol>
+                    </li>
+                </ul>
+                <p>Pseudocode (high level):</p>
+                <pre><code>procedure insertionSort(L):
+    if length(L) ≤ 1:
+        return L
+    else:
+        let x = first(L)
+        let R = rest(L)
+        let sortedR = insertionSort(R)
+        return sortedInsert(x, sortedR)</code></pre>
+                <p>Here <code>sortedInsert(x, sortedR)</code> is the same helper we used before:</p>
+                <ul>
+                    <li>it walks through the sorted list <code>sortedR</code></li>
+                    <li>finds the correct place for <code>x</code></li>
+                    <li>returns a new sorted list.</li>
+                </ul>
+                <p class="muted small">You do not need to run insertion sort on this page; this part is explanatory
+                    only.</p>
+            </article>
+        </section>
+
+        <!-- SECTION 5 – DFS PSEUDOCODE ON A GENERIC GRAPH -->
+        <section id="sec-generic-dfs" class="section">
+            <h2>5. Generic DFS: Pseudocode on an Adjacency Matrix</h2>
+            <p class="section-lead">
+                We move from train and mentoring stories to a generic DFS that works on any graph represented as an
+                adjacency matrix.
+            </p>
+
+            <article class="card">
+                <p>Now we move from specific stories (trains, mentoring) to a <strong>generic DFS algorithm</strong> on
+                    any graph.</p>
+                <p>Goal:</p>
+                <ul>
+                    <li>Given a graph and a starting node <code>i</code>, find all vertices <strong>reachable</strong>
+                        from <code>i</code> using DFS.</li>
+                </ul>
+                <p>We will assume:</p>
+                <ul>
+                    <li>The graph has <code>n</code> vertices numbered <code>0..n−1</code>.</li>
+                    <li>We have an <code>n × n</code> <strong>adjacency matrix</strong> <code>adj</code> where:
+                        <ul>
+                            <li><code>adj[u][v] = 1</code> if there is an edge from <code>u</code> to <code>v</code>.
+                            </li>
+                            <li><code>adj[u][v] = 0</code> otherwise.</li>
+                        </ul>
+                    </li>
+                    <li>We have a dictionary <code>visited</code> from vertex → boolean.</li>
+                </ul>
+
+                <h3>Pseudocode: DFS on an adjacency matrix</h3>
+                <pre><code>procedure DFS(i):
+    visited[i] = true
+    for each vertex j from 0 to n−1:
+        if adj[i][j] == 1 and visited[j] == false:
+            DFS(j)
+
+procedure exploreFrom(start):
+    for each vertex v from 0 to n−1:
+        visited[v] = false
+    DFS(start)</code></pre>
+                <p>After <code>DFS(start)</code>:</p>
+                <ul>
+                    <li>Every vertex with <code>visited[v] = true</code> is reachable from <code>start</code>.</li>
+                    <li>If <strong>all</strong> vertices are visited, the graph is <strong>connected</strong> (from that
+                        start node).</li>
+                </ul>
+            </article>
+
+            <article class="card" style="margin-top:1rem;">
+                <h3>Interactive 5.1 – DFS on a 10-node Sample Graph</h3>
+                <p class="muted small">
+                    The graph has vertices 1..10 arranged roughly in a chain with a few cross links to show branching.
+                </p>
+
+                <div class="two-cols">
+                    <div>
+                        <div class="graph-box">
+                            <svg id="generic-graph-svg" viewBox="0 0 620 200"
+                                aria-label="Sample graph for generic DFS"></svg>
+                        </div>
+                        <div class="panel">
+                            <h4>DFS tree edges</h4>
+                            <div id="generic-dfs-order" class="visit-order small muted">(visit order will appear here)
+                            </div>
+                        </div>
+                        <div class="panel" style="margin-top:0.5rem;">
+                            <h4>Graph connectivity from start</h4>
+                            <div id="generic-dfs-connected" class="small muted">(run DFS to check connectivity)</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="controls-row">
+                            <label for="generic-dfs-start">Start vertex:</label>
+                            <select id="generic-dfs-start">
+                                <option value="4">4</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+                        <div class="controls-row">
+                            <button id="generic-dfs-run">Run DFS step-by-step</button>
+                            <button id="generic-dfs-next" class="secondary" disabled>Next step</button>
+                        </div>
+
+                        <div class="panel-grid">
+                            <div class="panel">
+                                <h4>Call stack</h4>
+                                <ul id="generic-dfs-stack" class="stack-list">
+                                    <li>(empty)</li>
+                                </ul>
+                            </div>
+                            <div class="panel">
+                                <h4>Visited vertices</h4>
+                                <ul id="generic-dfs-visited" class="tag-list">
+                                    <li class="small muted">(none)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:0.7rem;">
+                            <span class="pill-label">Adjacency matrix (1..10)</span>
+                            <table id="generic-adj-table" class="adj-table" aria-label="Adjacency matrix"></table>
+                            <p class="tiny-note">
+                                DFS highlights the row of the vertex it is currently exploring.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <details class="qa" style="margin-top:0.9rem;">
+                    <summary>Mini question: Why no infinite circles?</summary>
+                    <div class="card">
+                        <p><strong>Q:</strong> Why does DFS not get stuck going in circles on a graph with cycles?</p>
+                        <p><strong>Answer:</strong></p>
+                        <p>Because we keep a <strong>visited</strong> array.<br />
+                            Every time we explore a vertex, we mark <code>visited[v] = true</code> and never call DFS on
+                            <code>v</code> again.<br />
+                            So even if there is an edge back to a visited vertex, we <strong>skip</strong> it.
+                        </p>
+                    </div>
+                </details>
+            </article>
+        </section>
+
+        <!-- SECTION 6 – MENTORING GRAPHS & STUDY CYCLES -->
+        <section id="sec-mentoring" class="section">
+            <h2>6. Mentoring Graphs &amp; Study Cycles</h2>
+            <p class="section-lead">
+                We build a directed mentoring graph from marks, then use DFS-style exploration to find 3-step study
+                cycles Maths → Physics → Chemistry.
+            </p>
+
+            <article class="card">
+                <p>We have 8 students and their marks in <strong>Maths (M)</strong>, <strong>Physics (P)</strong> and
+                    <strong>Chemistry (C)</strong>.
+                </p>
+                <p>One student can <strong>mentor</strong> another in a subject if:</p>
+                <ul>
+                    <li>Their mark in that subject is <strong>between 10 and 20 marks higher</strong>, inclusive.</li>
+                </ul>
+                <p>For example, if A has 75 in Maths and B has 60 in Maths, A can mentor B in Maths.</p>
+
+                <table class="mentor-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Maths</th>
+                            <th>Physics</th>
+                            <th>Chemistry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A</td>
+                            <td>69</td>
+                            <td>75</td>
+                            <td>76</td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td>59</td>
+                            <td>87</td>
+                            <td>57</td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td>82</td>
+                            <td>53</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td>41</td>
+                            <td>60</td>
+                            <td>79</td>
+                        </tr>
+                        <tr>
+                            <td>E</td>
+                            <td>64</td>
+                            <td>75</td>
+                            <td>85</td>
+                        </tr>
+                        <tr>
+                            <td>F</td>
+                            <td>40</td>
+                            <td>88</td>
+                            <td>49</td>
+                        </tr>
+                        <tr>
+                            <td>G</td>
+                            <td>68</td>
+                            <td>77</td>
+                            <td>78</td>
+                        </tr>
+                        <tr>
+                            <td>H</td>
+                            <td>69</td>
+                            <td>58</td>
+                            <td>62</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>Mentoring rule (directed edges):</strong></p>
+                <blockquote>
+                    Student X mentors student Y in subject S if<br />
+                    <code>mark[X][S] – mark[Y][S]</code> is between <strong>10 and 20</strong>, inclusive.
+                </blockquote>
+
+                <p>We are especially interested in <strong>3-step study cycles</strong> of the form:</p>
+                <blockquote>Maths → Physics → Chemistry, and back to the start student.</blockquote>
+                <p>Concretely:</p>
+                <blockquote>
+                    A study cycle is a triple (X, Y, Z) such that:
+                    <ul>
+                        <li>X mentors Y in <strong>Maths</strong></li>
+                        <li>Y mentors Z in <strong>Physics</strong></li>
+                        <li>Z mentors X in <strong>Chemistry</strong></li>
+                    </ul>
+                </blockquote>
+
+                <h3>Example cycles</h3>
+                <div class="card-soft">
+                    <p><strong>Cycle 1: B → F → A → B</strong></p>
+                    <ul>
+                        <li>B mentors F in Maths (59 − 40 = 19)</li>
+                        <li>F mentors A in Physics (88 − 75 = 13)</li>
+                        <li>A mentors B in Chemistry (76 − 57 = 19)</li>
+                    </ul>
+                    <p><strong>Cycle 2: C → A → H → C</strong></p>
+                    <ul>
+                        <li>C mentors A in Maths (82 − 69 = 13)</li>
+                        <li>A mentors H in Physics (75 − 58 = 17)</li>
+                        <li>H mentors C in Chemistry (62 − 50 = 12)</li>
+                    </ul>
+                </div>
+
+                <h3 style="margin-top:1rem;">6. Discovering Study Cycles with DFS</h3>
+                <p>We can think of each student as a <strong>node</strong>.<br />
+                    For each subject (M, P, C), we draw a <strong>directed edge</strong> from mentor to mentee.</p>
+                <p>We want to find all <strong>3-step cycles</strong> of the form:</p>
+                <ul>
+                    <li>Maths edge, then Physics edge, then Chemistry edge, back to the start.</li>
+                </ul>
+                <p>Strategy:</p>
+                <ul>
+                    <li>Use <strong>DFS</strong>.</li>
+                    <li>At each step, keep track of:
+                        <ul>
+                            <li>The current student.</li>
+                            <li>The <strong>path length</strong> (0, 1, 2, 3).</li>
+                            <li>The <strong>sequence of subjects</strong> used so far (e.g., <code>"M"</code>,
+                                <code>"MP"</code>, <code>"MPC"</code>).
+                            </li>
+                        </ul>
+                    </li>
+                    <li>We never explore paths longer than 3 edges.</li>
+                    <li>When we come back to the <strong>start student</strong> with subject sequence
+                        <code>"MPC"</code>, we have found a <strong>valid study cycle</strong>.
+                    </li>
+                </ul>
+
+                <h3>Pseudocode sketch (conceptual)</h3>
+                <pre><code>procedure DFSStudy(startStudent):
+    mark all students as not seen in this search
+    call explore(startStudent, startStudent, "", 0)
+
+procedure explore(start, current, subjectSeq, length):
+    if length == 3:
+        if current == start and subjectSeq == "MPC":
+            record this cycle
+        return
+
+    if length == 0:
+        nextSubject = "M"
+    else if length == 1:
+        nextSubject = "P"
+    else:
+        nextSubject = "C"
+
+    for each student next such that current mentors next in nextSubject:
+        explore(start, next, subjectSeq + nextSubject, length + 1)</code></pre>
+            </article>
+
+            <article class="card" style="margin-top:1rem;">
+                <h3>Interactive 6.1 – Build and Explore the Mentoring Graph</h3>
+
+                <p class="muted small">
+                    First generate the mentoring edges for each subject, then search for M→P→C cycles with DFS-style
+                    exploration.
+                </p>
+
+                <div class="student-chips">
+                    <span class="student-chip" data-student-node="A">A</span>
+                    <span class="student-chip" data-student-node="B">B</span>
+                    <span class="student-chip" data-student-node="C">C</span>
+                    <span class="student-chip" data-student-node="D">D</span>
+                    <span class="student-chip" data-student-node="E">E</span>
+                    <span class="student-chip" data-student-node="F">F</span>
+                    <span class="student-chip" data-student-node="G">G</span>
+                    <span class="student-chip" data-student-node="H">H</span>
+                </div>
+
+                <div class="controls-row" style="margin-top:0.7rem;">
+                    <button id="mentor-show-edges">Show mentoring edges for M / P / C</button>
+                </div>
+                <div id="mentor-edges-content" class="small" style="margin-top:0.5rem;"></div>
+
+                <div class="controls-row" style="margin-top:0.9rem;">
+                    <label for="mentor-start">Start student for M-P-C cycle search:</label>
+                    <select id="mentor-start">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="G">G</option>
+                        <option value="H">H</option>
+                    </select>
+                    <button id="mentor-find-cycles">Find all M-P-C cycles starting here</button>
+                </div>
+
+                <div class="panel" style="margin-top:0.7rem;">
+                    <h4>M-P-C study cycles found</h4>
+                    <ul id="mentor-cycles-output" class="stack-list small">
+                        <li>(no search yet)</li>
+                    </ul>
+                </div>
+
+                <div class="card mcq-card" style="margin-top:1rem;">
+                    <h3>Small check questions</h3>
+
+                    <!-- Q1 -->
+                    <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="instant" data-correct-option="A"
+                        data-hint="Hint: We only care about 3-step cycles M→P→C.">
+                        <p><strong>Q1:</strong> In our definition, why do we stop exploring when the path length becomes
+                            3?</p>
+                        <ul class="mcq-options">
+                            <li>
+                                <input type="radio" name="s6-q1" id="s6-q1-A" value="A" />
+                                <label for="s6-q1-A">(A) Because we only care about 3-step cycles M→P→C.</label>
+                            </li>
+                            <li>
+                                <input type="radio" name="s6-q1" id="s6-q1-B" value="B" />
+                                <label for="s6-q1-B">(B) Because DFS cannot go deeper than 3.</label>
+                            </li>
+                            <li>
+                                <input type="radio" name="s6-q1" id="s6-q1-C" value="C" />
+                                <label for="s6-q1-C">(C) Because there are only 3 subjects in the world.</label>
+                            </li>
+                            <li>
+                                <input type="radio" name="s6-q1" id="s6-q1-D" value="D" />
+                                <label for="s6-q1-D">(D) Because longer paths cannot contain cycles.</label>
+                            </li>
+                        </ul>
+                        <div class="mcq-feedback" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="instant" data-correct-option="B"
+                        data-hint="Hint: We want subjects in the order Maths, then Physics, then Chemistry.">
+                        <p><strong>Q2:</strong> Why do we carry the subject sequence string (like <code>"MPC"</code>) in
+                            the DFS?</p>
+                        <ul class="mcq-options">
+                            <li>
+                                <input type="radio" name="s6-q2" id="s6-q2-A" value="A" />
+                                <label for="s6-q2-A">(A) To store marks for each subject.</label>
+                            </li>
+                            <li>
+                                <input type="radio" name="s6-q2" id="s6-q2-B" value="B" />
+                                <label for="s6-q2-B">(B) To check that we use subjects in the order <strong>Maths, then
+                                        Physics, then Chemistry</strong>.</label>
+                            </li>
+                            <li>
+                                <input type="radio" name="s6-q2" id="s6-q2-C" value="C" />
+                                <label for="s6-q2-C">(C) To sort students by subjects.</label>
+                            </li>
+                            <li>
+                                <input type="radio" name="s6-q2" id="s6-q2-D" value="D" />
+                                <label for="s6-q2-D">(D) To count how many edges we used.</label>
+                            </li>
+                        </ul>
+                        <div class="mcq-feedback" aria-live="polite"></div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <!-- SECTION 6.5 – PLAYGROUND -->
+        <section id="sec-playground" class="section animate-in">
+            <h2>6.5. Graph Playground</h2>
+            <p class="section-lead">Create your own graph and watch DFS explore it.</p>
+
+            <article class="card">
+                <div class="grid-2">
+                    <div>
+                        <label for="playground-input"
+                            style="display:block; margin-bottom:0.5rem; font-weight:600;">Adjacency List (JSON):</label>
+                        <textarea id="playground-input" rows="10"
+                            style="width:100%; padding:0.8rem; border-radius:var(--radius-sm); border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-primary); font-family:var(--font-mono); font-size:0.9rem; line-height:1.5;">
+{
+  "A": ["B", "C"],
+  "B": ["D", "E"],
+  "C": ["F"],
+  "D": [],
+  "E": ["F"],
+  "F": []
+}</textarea>
+                        <div class="controls-row" style="margin-top:1rem;">
+                            <button id="playground-build">Build Graph</button>
+                            <button id="playground-run" class="secondary">Run DFS</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="graph-box"
+                            style="min-height: 300px; display:flex; align-items:center; justify-content:center;">
+                            <svg id="playground-svg" viewBox="0 0 400 300" style="width:100%; height:100%;"></svg>
+                        </div>
+                        <div class="panel" style="margin-bottom: 0.5rem;">
+                            <h4>Iterative DFS Pseudocode</h4>
+                            <pre id="playground-code" style="padding: 0.5rem; font-size: 0.8rem;">
+<div id="line-1">s = new Stack()</div><div id="line-2">s.push(start)</div><div id="line-3">while s is not empty:</div><div id="line-4">  u = s.pop()</div><div id="line-5">  if u is not visited:</div><div id="line-6">    visit(u)</div><div id="line-7">    for v in neighbors(u):</div><div id="line-8">      s.push(v)</div></pre>
+                        </div>
+                        <div class="panel">
+                            <h4>Log</h4>
+                            <div id="playground-log" class="small muted" style="max-height:100px; overflow-y:auto;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <!-- SECTION 7 – WRAP-UP + SELF-CHECK QUIZ -->
+        <section id="sec-wrap" class="section">
+            <h2>7. Wrap-Up + Self-Check Quiz</h2>
+
+            <article class="card">
+                <h3>Week 11 in One Page</h3>
+                <p>We saw how to run <strong>depth-first search (DFS)</strong> on the train graph (stations as nodes).
+                </p>
+                <p>We flipped the perspective and ran DFS on <strong>trains as nodes</strong> using <strong>mutual
+                        recursion</strong> between <code>visitTrain</code> and <code>visitStation</code>.</p>
+                <p>We studied <strong>recursion</strong> more generally:</p>
+                <ul>
+                    <li>Factorial as an inductive definition on numbers.</li>
+                    <li>Sum of a list and insertion sort as inductive definitions on lists.</li>
+                    <li>The importance of <strong>base cases</strong> and why bad inputs (like
+                        <code>factorial(−1)</code>) can cause non-termination.
+                    </li>
+                </ul>
+                <p>We wrote and traced <strong>generic DFS pseudocode</strong> using an adjacency matrix and
+                    <code>visited</code> array.
+                </p>
+                <p>We applied DFS to a <strong>mentoring graph</strong> to find structured <strong>study cycles</strong>
+                    (Maths → Physics → Chemistry).</p>
+                <p><strong>The big idea:</strong></p>
+                <blockquote>
+                    Once you understand recursion and DFS, you can systematically explore big graphs,<br />
+                    avoid getting lost in cycles, and express complex searches in a few clean lines of pseudocode.
+                </blockquote>
+            </article>
+
+            <article class="card" style="margin-top:1rem;">
+                <h3>Final 6-question Quiz</h3>
+                <p class="muted small">
+                    Answer all 6, then click “Check score”. This also boosts your progress bar.
+                </p>
+
+                <!-- Q1 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="final" data-correct-option="C">
+                    <p><strong>Q1.</strong> What is the key difference between DFS and BFS?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="f-q1" id="f-q1-A" value="A" />
+                            <label for="f-q1-A">(A) DFS always finds the shortest path.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q1" id="f-q1-B" value="B" />
+                            <label for="f-q1-B">(B) BFS always visits nodes in alphabetical order.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q1" id="f-q1-C" value="C" />
+                            <label for="f-q1-C">(C) DFS goes <strong>deep along one path</strong> before backtracking,
+                                BFS explores <strong>level by level</strong>.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q1" id="f-q1-D" value="D" />
+                            <label for="f-q1-D">(D) BFS cannot be implemented recursively.</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Q2 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="final" data-correct-option="B">
+                    <p><strong>Q2.</strong> In DFS, why do we maintain a <code>visited</code> (or <code>seen</code>)
+                        dictionary?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="f-q2" id="f-q2-A" value="A" />
+                            <label for="f-q2-A">(A) To store distances.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q2" id="f-q2-B" value="B" />
+                            <label for="f-q2-B">(B) To avoid revisiting nodes and getting stuck in cycles.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q2" id="f-q2-C" value="C" />
+                            <label for="f-q2-C">(C) To store the degree of each node.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q2" id="f-q2-D" value="D" />
+                            <label for="f-q2-D">(D) To count number of connected components.</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Q3 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="final" data-correct-option="B">
+                    <p><strong>Q3.</strong> What is a <strong>base case</strong> in a recursive definition?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="f-q3" id="f-q3-A" value="A" />
+                            <label for="f-q3-A">(A) The case where we call the function on two arguments.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q3" id="f-q3-B" value="B" />
+                            <label for="f-q3-B">(B) A simple case where we know the answer directly, without further
+                                recursive calls.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q3" id="f-q3-C" value="C" />
+                            <label for="f-q3-C">(C) The last line of the program.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q3" id="f-q3-D" value="D" />
+                            <label for="f-q3-D">(D) The case with the largest input.</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Q4 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="final" data-correct-option="C">
+                    <p><strong>Q4.</strong> What goes wrong if we call <code>factorial(−1)</code> using the standard
+                        recursive definition with base case <code>n == 0</code>?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="f-q4" id="f-q4-A" value="A" />
+                            <label for="f-q4-A">(A) It returns 0, which is wrong.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q4" id="f-q4-B" value="B" />
+                            <label for="f-q4-B">(B) It returns a negative number.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q4" id="f-q4-C" value="C" />
+                            <label for="f-q4-C">(C) The recursive calls never reach the base case and the computation
+                                does not terminate.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q4" id="f-q4-D" value="D" />
+                            <label for="f-q4-D">(D) It automatically fixes the input to 0.</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Q5 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="final" data-correct-option="C">
+                    <p><strong>Q5.</strong> In the mutual recursion between <code>visitTrain</code> and
+                        <code>visitStation</code>, what makes the recursion eventually stop?
+                    </p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="f-q5" id="f-q5-A" value="A" />
+                            <label for="f-q5-A">(A) A limit on the number of trains.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q5" id="f-q5-B" value="B" />
+                            <label for="f-q5-B">(B) The distance between stations.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q5" id="f-q5-C" value="C" />
+                            <label for="f-q5-C">(C) The <code>seenTrain</code> and <code>seenStation</code>
+                                dictionaries, which prevent revisiting the same train or station.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q5" id="f-q5-D" value="D" />
+                            <label for="f-q5-D">(D) A timer that kills the program after a while.</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Q6 -->
+                <div class="mcq-question" data-progress-type="mcq" data-mcq-kind="final" data-correct-option="B">
+                    <p><strong>Q6.</strong> In the mentoring graph, what makes a triple (X, Y, Z) a valid M→P→C study
+                        cycle?</p>
+                    <ul class="mcq-options">
+                        <li>
+                            <input type="radio" name="f-q6" id="f-q6-A" value="A" />
+                            <label for="f-q6-A">(A) X, Y, Z have the same total marks.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q6" id="f-q6-B" value="B" />
+                            <label for="f-q6-B">(B) X mentors Y in Maths, Y mentors Z in Physics, and Z mentors X in
+                                Chemistry, with each mentoring edge having a mark difference between 10 and 20.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q6" id="f-q6-C" value="C" />
+                            <label for="f-q6-C">(C) They are alphabetically consecutive.</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="f-q6" id="f-q6-D" value="D" />
+                            <label for="f-q6-D">(D) They sit next to each other in class.</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="final-quiz-footer">
+                    <button id="final-quiz-submit">Check score</button>
+                </div>
+                <div id="final-quiz-feedback" class="final-quiz-feedback" aria-live="polite"></div>
+            </article>
+        </section>
+    </main>
+
+    <script>
+        // ---------- GLOBAL PROGRESS ----------
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('[data-progress-type="check"]');
+            const mcqQuestions = document.querySelectorAll('[data-progress-type="mcq"]');
+
+            let total = 0;
+            let completed = 0;
+
+            total += checkboxes.length;
+            checkboxes.forEach(cb => {
+                if (cb.checked) completed++;
+            });
+
+            total += mcqQuestions.length;
+            mcqQuestions.forEach(q => {
+                const correct = q.dataset.correctOption;
+                const selected = q.querySelector('input[type="radio"]:checked');
+                if (selected && selected.value === correct) {
+                    completed++;
+                }
+            });
+
+            const percent = total ? Math.round((completed / total) * 100) : 0;
+            const fill = document.getElementById('global-progress');
+            const label = document.getElementById('progress-label');
+            if (fill) {
+                fill.style.width = percent + '%';
+                fill.setAttribute('aria-valuenow', String(percent));
+            }
+            if (label) {
+                label.textContent = percent + '%';
+            }
+        }
+
+        // ---------- MCQ (instant feedback) ----------
+        function initInstantMCQs() {
+            const questions = document.querySelectorAll('.mcq-question[data-mcq-kind="instant"]');
+            questions.forEach(q => {
+                const radios = q.querySelectorAll('input[type="radio"]');
+                const feedback = q.querySelector('.mcq-feedback');
+                radios.forEach(r => {
+                    r.addEventListener('change', () => {
+                        const correct = q.dataset.correctOption;
+                        if (r.value === correct) {
+                            q.classList.add('mcq-correct');
+                            q.classList.remove('mcq-incorrect');
+                            if (feedback) {
+                                feedback.textContent = 'Correct! ✅';
+                            }
+                        } else {
+                            q.classList.remove('mcq-correct');
+                            q.classList.add('mcq-incorrect');
+                            if (feedback) {
+                                feedback.textContent = q.dataset.hint || 'Hint: Look back at the explanation above.';
+                            }
+                        }
+                        updateProgress();
+                    });
+                });
+            });
+        }
+
+        // ---------- SECTION 2 DFS ON STATIONS ----------
+        const stationAdjacency = {
+            KOL: ['DEL', 'KAN', 'NAG'],
+            NAG: ['SEC'],
+            SEC: ['PUN'],
+            PUN: ['DEL'],
+            DEL: ['KAN'],
+            KAN: []
+        };
+
+        function buildStationDFSEvents(start) {
+            const visited = new Set();
+            const log = [];
+            function dfs(u) {
+                log.push({ type: 'call', node: u });
+                if (visited.has(u)) {
+                    log.push({ type: 'already', node: u });
+                    log.push({ type: 'return', node: u });
+                    return;
+                }
+                visited.add(u);
+                log.push({ type: 'visit', node: u });
+                const neighbours = (stationAdjacency[u] || []).slice();
+                neighbours.forEach(v => dfs(v));
+                log.push({ type: 'return', node: u });
+            }
+            dfs(start);
+            return log;
+        }
+
+        function initDFSStations() {
+            const startSelect = document.getElementById('dfs-station-start');
+            const runBtn = document.getElementById('dfs-station-run');
+            const nextBtn = document.getElementById('dfs-station-next');
+            const stackList = document.getElementById('dfs-station-stack');
+            const visitedList = document.getElementById('dfs-station-visited');
+            const orderEl = document.getElementById('dfs-station-order');
+
+            if (!runBtn || !nextBtn) return;
+
+            const stationNodes = {};
+            ['KOL', 'NAG', 'DEL', 'PUN', 'SEC', 'KAN'].forEach(code => {
+                const el = document.querySelector('[data-station-node="' + code + '"]');
+                if (el) stationNodes[code] = el;
+            });
+
+            const stationEdges = {};
+            [
+                ['KOL', 'DEL'],
+                ['KOL', 'KAN'],
+                ['KOL', 'NAG'],
+                ['NAG', 'SEC'],
+                ['SEC', 'PUN'],
+                ['PUN', 'DEL'],
+                ['DEL', 'KAN']
+            ].forEach(([from, to]) => {
+                const edge = document.getElementById('edge-' + from + '-' + to);
+                if (edge) stationEdges[from + '-' + to] = edge;
+            });
+
+            let events = [];
+            let stepIndex = 0;
+            let visited = new Set();
+            let visitOrder = [];
+            let stack = [];
+
+            function clearGraphHighlight() {
+                Object.values(stationNodes).forEach(node => {
+                    node.classList.remove('visited', 'current');
+                });
+                Object.values(stationEdges).forEach(e => e.classList.remove('tree-edge'));
+            }
+
+            function renderStack() {
+                stackList.innerHTML = '';
+                if (!stack.length) {
+                    const li = document.createElement('li');
+                    li.textContent = '(empty)';
+                    stackList.appendChild(li);
+                    return;
+                }
+                stack.forEach((node, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = node;
+                    if (idx === stack.length - 1) li.classList.add('stack-top');
+                    stackList.appendChild(li);
+                });
+            }
+
+            function renderVisited() {
+                visitedList.innerHTML = '';
+                if (!visited.size) {
+                    const li = document.createElement('li');
+                    li.textContent = '(none)';
+                    li.classList.add('small', 'muted');
+                    visitedList.appendChild(li);
+                    return;
+                }
+                Array.from(visited).forEach(node => {
+                    const li = document.createElement('li');
+                    li.classList.add('tag', 'visited');
+                    li.textContent = node;
+                    visitedList.appendChild(li);
+                });
+            }
+
+            function renderOrder() {
+                if (!visitOrder.length) {
+                    orderEl.textContent = '(no steps yet)';
+                    orderEl.classList.add('muted');
+                } else {
+                    orderEl.classList.remove('muted');
+                    orderEl.textContent = visitOrder.join(' → ');
+                }
+            }
+
+            function setCurrentNode(code) {
+                Object.entries(stationNodes).forEach(([name, el]) => {
+                    if (code && name === code) el.classList.add('current');
+                    else el.classList.remove('current');
+                });
+            }
+
+            function handleEvent(ev) {
+                switch (ev.type) {
+                    case 'call':
+                        stack.push(ev.node);
+                        setCurrentNode(ev.node);
+                        break;
+                    case 'visit':
+                        if (!visited.has(ev.node)) {
+                            visited.add(ev.node);
+                            visitOrder.push(ev.node);
+                            const nEl = stationNodes[ev.node];
+                            if (nEl) nEl.classList.add('visited');
+                            if (stack.length >= 2) {
+                                const parent = stack[stack.length - 2];
+                                const edge = stationEdges[parent + '-' + ev.node];
+                                if (edge) edge.classList.add('tree-edge');
+                            }
+                        }
+                        break;
+                    case 'already':
+                        break;
+                    case 'return':
+                        stack.pop();
+                        const top = stack[stack.length - 1] || null;
+                        setCurrentNode(top);
+                        break;
+                }
+                renderStack();
+                renderVisited();
+                renderOrder();
+            }
+
+            function resetState() {
+                visited = new Set();
+                visitOrder = [];
+                stack = [];
+                clearGraphHighlight();
+                stackList.innerHTML = '<li>(empty)</li>';
+                visitedList.innerHTML = '<li class="small muted">(none)</li>';
+                orderEl.textContent = '(no steps yet)';
+                orderEl.classList.add('muted');
+                nextBtn.disabled = true;
+                nextBtn.textContent = 'Next step';
+            }
+
+            runBtn.addEventListener('click', () => {
+                const start = startSelect.value || 'KOL';
+                resetState();
+                events = buildStationDFSEvents(start);
+                stepIndex = 0;
+                if (events.length) {
+                    nextBtn.disabled = false;
+                    handleEvent(events[stepIndex++]);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (stepIndex >= events.length) {
+                    nextBtn.disabled = true;
+                    nextBtn.textContent = 'Done';
+                    return;
+                }
+                handleEvent(events[stepIndex++]);
+                if (stepIndex >= events.length) {
+                    nextBtn.textContent = 'Done';
+                }
+            });
+        }
+
+        // ---------- SECTION 3 – MUTUAL DFS (TRAINS / STATIONS) ----------
+        const trainsData = {
+            T1: { start: 'KOL', end: 'NAG' },
+            T2: { start: 'KOL', end: 'NAG' },
+            T3: { start: 'NAG', end: 'SEC' },
+            T4: { start: 'SEC', end: 'PUN' },
+            T5: { start: 'PUN', end: 'DEL' },
+            T6: { start: 'KOL', end: 'DEL' },
+            T7: { start: 'KOL', end: 'DEL' },
+            T8: { start: 'DEL', end: 'KAN' },
+            T9: { start: 'KOL', end: 'KAN' }
+        };
+
+        const allStations = ['KOL', 'NAG', 'DEL', 'PUN', 'SEC', 'KAN'];
+
+        function buildMutualEvents(startTrain) {
+            const seenTrain = new Set();
+            const seenStation = new Set();
+            const events = [];
+            const trainsByStation = {};
+            allStations.forEach(s => { trainsByStation[s] = []; });
+            Object.entries(trainsData).forEach(([id, info]) => {
+                trainsByStation[info.start].push(id);
+                trainsByStation[info.end].push(id);
+            });
+
+            function visitTrain(t) {
+                events.push({ type: 'callTrain', train: t });
+                if (seenTrain.has(t)) {
+                    events.push({ type: 'returnTrain', train: t, already: true });
+                    return;
+                }
+                seenTrain.add(t);
+                events.push({ type: 'markTrain', train: t });
+                const info = trainsData[t];
+                visitStation(info.start);
+                visitStation(info.end);
+                events.push({ type: 'returnTrain', train: t });
+            }
+
+            function visitStation(s) {
+                events.push({ type: 'callStation', station: s });
+                if (seenStation.has(s)) {
+                    events.push({ type: 'returnStation', station: s, already: true });
+                    return;
+                }
+                seenStation.add(s);
+                events.push({ type: 'markStation', station: s });
+                const list = trainsByStation[s] || [];
+                list.forEach(t => visitTrain(t));
+                events.push({ type: 'returnStation', station: s });
+            }
+
+            visitTrain(startTrain);
+            return events;
+        }
+
+        function initMutualDFS() {
+            const startSelect = document.getElementById('mutual-start-train');
+            const runBtn = document.getElementById('mutual-run');
+            const nextBtn = document.getElementById('mutual-next');
+            const stackList = document.getElementById('mutual-stack');
+            const seenTrainsList = document.getElementById('mutual-seen-trains');
+            const seenStationsList = document.getElementById('mutual-seen-stations');
+            const orderEl = document.getElementById('mutual-order');
+
+            if (!runBtn || !nextBtn) return;
+
+            const trainNodes = {};
+            Object.keys(trainsData).forEach(t => {
+                const el = document.querySelector('[data-train-node="' + t + '"]');
+                if (el) trainNodes[t] = el;
+            });
+            const stationChips = {};
+            allStations.forEach(s => {
+                const el = document.querySelector('[data-station-chip="' + s + '"]');
+                if (el) stationChips[s] = el;
+            });
+
+            let events = [];
+            let stepIndex = 0;
+            let callStack = [];
+            let seenTrain = new Set();
+            let seenStation = new Set();
+            let trainOrder = [];
+
+            function resetMutual() {
+                callStack = [];
+                seenTrain = new Set();
+                seenStation = new Set();
+                trainOrder = [];
+                stackList.innerHTML = '<li>(empty)</li>';
+                seenTrainsList.innerHTML = '<li class="small muted">(none)</li>';
+                seenStationsList.innerHTML = '<li class="small muted">(none)</li>';
+                orderEl.textContent = '(no run yet)';
+                orderEl.classList.add('muted');
+                Object.values(trainNodes).forEach(n => {
+                    n.classList.remove('visited', 'current');
+                });
+                Object.values(stationChips).forEach(c => {
+                    c.classList.remove('visited');
+                });
+                nextBtn.disabled = true;
+                nextBtn.textContent = 'Next step';
+            }
+
+            function renderStack() {
+                stackList.innerHTML = '';
+                if (!callStack.length) {
+                    const li = document.createElement('li');
+                    li.textContent = '(empty)';
+                    stackList.appendChild(li);
+                    return;
+                }
+                callStack.forEach((frame, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = frame.kind === 'train'
+                        ? 'Train ' + frame.id
+                        : 'Station ' + frame.id;
+                    if (idx === callStack.length - 1) li.classList.add('stack-top');
+                    stackList.appendChild(li);
+                });
+            }
+
+            function renderSeenTrains() {
+                seenTrainsList.innerHTML = '';
+                if (!seenTrain.size) {
+                    const li = document.createElement('li');
+                    li.textContent = '(none)';
+                    li.classList.add('small', 'muted');
+                    seenTrainsList.appendChild(li);
+                    return;
+                }
+                Array.from(seenTrain).forEach(t => {
+                    const li = document.createElement('li');
+                    li.classList.add('tag', 'visited');
+                    li.textContent = t;
+                    seenTrainsList.appendChild(li);
+                });
+            }
+
+            function renderSeenStations() {
+                seenStationsList.innerHTML = '';
+                if (!seenStation.size) {
+                    const li = document.createElement('li');
+                    li.textContent = '(none)';
+                    li.classList.add('small', 'muted');
+                    seenStationsList.appendChild(li);
+                    return;
+                }
+                Array.from(seenStation).forEach(s => {
+                    const li = document.createElement('li');
+                    li.classList.add('tag', 'visited');
+                    li.textContent = s;
+                    seenStationsList.appendChild(li);
+                });
+            }
+
+            function renderOrder() {
+                if (!trainOrder.length) {
+                    orderEl.textContent = '(no run yet)';
+                    orderEl.classList.add('muted');
+                } else {
+                    orderEl.classList.remove('muted');
+                    orderEl.textContent = trainOrder.join(' → ');
+                }
+            }
+
+            function setCurrentTrain(id) {
+                Object.entries(trainNodes).forEach(([name, el]) => {
+                    if (name === id) el.classList.add('current');
+                    else el.classList.remove('current');
+                });
+            }
+
+            function handleEvent(ev) {
+                switch (ev.type) {
+                    case 'callTrain':
+                        callStack.push({ kind: 'train', id: ev.train });
+                        setCurrentTrain(ev.train);
+                        break;
+                    case 'markTrain':
+                        if (!seenTrain.has(ev.train)) {
+                            seenTrain.add(ev.train);
+                            const n = trainNodes[ev.train];
+                            if (n) n.classList.add('visited');
+                            if (!trainOrder.includes(ev.train)) trainOrder.push(ev.train);
+                        }
+                        break;
+                    case 'returnTrain':
+                        callStack.pop();
+                        const topT = callStack[callStack.length - 1];
+                        if (topT && topT.kind === 'train') {
+                            setCurrentTrain(topT.id);
+                        } else if (!topT) {
+                            setCurrentTrain(null);
+                        }
+                        break;
+                    case 'callStation':
+                        callStack.push({ kind: 'station', id: ev.station });
+                        break;
+                    case 'markStation':
+                        if (!seenStation.has(ev.station)) {
+                            seenStation.add(ev.station);
+                            const chip = stationChips[ev.station];
+                            if (chip) chip.classList.add('visited');
+                        }
+                        break;
+                    case 'returnStation':
+                        callStack.pop();
+                        break;
+                }
+                renderStack();
+                renderSeenTrains();
+                renderSeenStations();
+                renderOrder();
+            }
+
+            runBtn.addEventListener('click', () => {
+                const start = startSelect.value || 'T1';
+                resetMutual();
+                events = buildMutualEvents(start);
+                stepIndex = 0;
+                if (events.length) {
+                    nextBtn.disabled = false;
+                    handleEvent(events[stepIndex++]);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (stepIndex >= events.length) {
+                    nextBtn.disabled = true;
+                    nextBtn.textContent = 'Done';
+                    return;
+                }
+                handleEvent(events[stepIndex++]);
+                if (stepIndex >= events.length) {
+                    nextBtn.textContent = 'Done';
+                }
+            });
+        }
+
+        // ---------- SECTION 4 – FACTORIAL VISUALISER ----------
+        function buildFactorialEvents(n) {
+            const events = [];
+            for (let k = n; k >= 0; k--) {
+                events.push({ type: 'call', n: k });
+            }
+            let value = 1;
+            for (let k = 0; k <= n; k++) {
+                if (k === 0) value = 1;
+                else value *= k;
+                events.push({ type: 'return', n: k, value });
+            }
+            return events;
+        }
+
+        function initFactorialVisualizer() {
+            const input = document.getElementById('factorial-input');
+            const runBtn = document.getElementById('factorial-run');
+            const nextBtn = document.getElementById('factorial-next');
+            const stackList = document.getElementById('factorial-stack');
+            const returnsList = document.getElementById('factorial-returns');
+            const warningEl = document.getElementById('factorial-warning');
+            if (!runBtn || !nextBtn) return;
+
+            let events = [];
+            let stepIndex = 0;
+            let stack = [];
+
+            function reset() {
+                stack = [];
+                events = [];
+                stepIndex = 0;
+                stackList.innerHTML = '<li>(empty)</li>';
+                returnsList.innerHTML = '';
+                warningEl.textContent = '';
+                nextBtn.disabled = true;
+                nextBtn.textContent = 'Next step';
+            }
+
+            function renderStack() {
+                stackList.innerHTML = '';
+                if (!stack.length) {
+                    const li = document.createElement('li');
+                    li.textContent = '(empty)';
+                    stackList.appendChild(li);
+                    return;
+                }
+                stack.forEach((n, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = 'factorial(' + n + ')';
+                    if (idx === stack.length - 1) li.classList.add('stack-top');
+                    stackList.appendChild(li);
+                });
+            }
+
+            function handleEvent(ev) {
+                if (ev.type === 'call') {
+                    stack.push(ev.n);
+                    renderStack();
+                } else if (ev.type === 'return') {
+                    const li = document.createElement('li');
+                    li.textContent = 'factorial(' + ev.n + ') = ' + ev.value;
+                    returnsList.appendChild(li);
+                    stack.pop();
+                    renderStack();
+                }
+            }
+
+            runBtn.addEventListener('click', () => {
+                reset();
+                let n = parseInt(input.value, 10);
+                if (isNaN(n)) n = 0;
+                if (n < 0) {
+                    warningEl.textContent = 'With this definition, factorial of a negative number never reaches the base case. The recursion would never stop.';
+                    return;
+                }
+                if (n > 7) n = 7;
+                input.value = String(n);
+                events = buildFactorialEvents(n);
+                if (events.length) {
+                    nextBtn.disabled = false;
+                    handleEvent(events[stepIndex++]);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (stepIndex >= events.length) {
+                    nextBtn.disabled = true;
+                    nextBtn.textContent = 'Done';
+                    return;
+                }
+                handleEvent(events[stepIndex++]);
+                if (stepIndex >= events.length) {
+                    nextBtn.textContent = 'Done';
+                }
+            });
+        }
+
+        // ---------- SECTION 4 – LIST SUM VISUALISER ----------
+        function buildListSumEvents(list) {
+            const events = [];
+            function rec(arr) {
+                events.push({ type: 'call', list: arr.slice() });
+                if (!arr.length) {
+                    events.push({ type: 'base', list: [], value: 0 });
+                    return 0;
+                }
+                const first = arr[0];
+                const rest = arr.slice(1);
+                events.push({ type: 'expand', list: arr.slice(), first, rest: rest.slice() });
+                const sub = rec(rest);
+                const value = first + sub;
+                events.push({ type: 'return', list: arr.slice(), value });
+                return value;
+            }
+            rec(list.slice());
+            return events;
+        }
+
+        function initListSumVisualizer() {
+            const select = document.getElementById('listsum-select');
+            const runBtn = document.getElementById('listsum-run');
+            const nextBtn = document.getElementById('listsum-next');
+            const stackList = document.getElementById('listsum-stack');
+            const logList = document.getElementById('listsum-log');
+            if (!runBtn || !nextBtn) return;
+
+            let events = [];
+            let stepIndex = 0;
+            let stack = [];
+
+            function reset() {
+                events = [];
+                stepIndex = 0;
+                stack = [];
+                stackList.innerHTML = '<li>(empty)</li>';
+                logList.innerHTML = '';
+                nextBtn.disabled = true;
+                nextBtn.textContent = 'Next step';
+            }
+
+            function renderStack() {
+                stackList.innerHTML = '';
+                if (!stack.length) {
+                    const li = document.createElement('li');
+                    li.textContent = '(empty)';
+                    stackList.appendChild(li);
+                    return;
+                }
+                stack.forEach((arr, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = 'listSum([' + arr.join(', ') + '])';
+                    if (idx === stack.length - 1) li.classList.add('stack-top');
+                    stackList.appendChild(li);
+                });
+            }
+
+            function handleEvent(ev) {
+                if (ev.type === 'call') {
+                    stack.push(ev.list);
+                    renderStack();
+                } else if (ev.type === 'expand') {
+                    const li = document.createElement('li');
+                    li.textContent = 'listSum([' + ev.list.join(', ') + ']) = ' +
+                        ev.first + ' + listSum([' + ev.rest.join(', ') + '])';
+                    logList.appendChild(li);
+                } else if (ev.type === 'base') {
+                    const li = document.createElement('li');
+                    li.textContent = 'listSum([]) = 0';
+                    logList.appendChild(li);
+                } else if (ev.type === 'return') {
+                    const li = document.createElement('li');
+                    li.textContent = 'listSum([' + ev.list.join(', ') + ']) = ' + ev.value;
+                    logList.appendChild(li);
+                    stack.pop();
+                    renderStack();
+                }
+            }
+
+            runBtn.addEventListener('click', () => {
+                reset();
+                const val = select.value || '';
+                const list = val.split(',').filter(x => x.trim() !== '').map(x => parseInt(x, 10));
+                events = buildListSumEvents(list);
+                if (events.length) {
+                    nextBtn.disabled = false;
+                    handleEvent(events[stepIndex++]);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (stepIndex >= events.length) {
+                    nextBtn.disabled = true;
+                    nextBtn.textContent = 'Done';
+                    return;
+                }
+                handleEvent(events[stepIndex++]);
+                if (stepIndex >= events.length) {
+                    nextBtn.textContent = 'Done';
+                }
+            });
+        }
+
+        // ---------- SECTION 5 – GENERIC DFS ----------
+        function initGenericDFS() {
+            const svg = document.getElementById('generic-graph-svg');
+            const table = document.getElementById('generic-adj-table');
+            const startSelect = document.getElementById('generic-dfs-start');
+            const runBtn = document.getElementById('generic-dfs-run');
+            const nextBtn = document.getElementById('generic-dfs-next');
+            const stackList = document.getElementById('generic-dfs-stack');
+            const visitedList = document.getElementById('generic-dfs-visited');
+            const orderEl = document.getElementById('generic-dfs-order');
+            const connectedEl = document.getElementById('generic-dfs-connected');
+
+            if (!svg || !table || !runBtn || !nextBtn) return;
+
+            const vertices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            const edges = [
+                [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10],
+                [4, 2], [4, 3], [5, 7], [8, 6]
+            ];
+            const adj = {};
+            vertices.forEach(v => { adj[v] = []; });
+            edges.forEach(([u, v]) => {
+                adj[u].push(v);
+                adj[v].push(u);
+            });
+
+            // Build adjacency table
+            const thead = document.createElement('thead');
+            const headRow = document.createElement('tr');
+            const corner = document.createElement('th');
+            headRow.appendChild(corner);
+            vertices.forEach(v => {
+                const th = document.createElement('th');
+                th.textContent = v;
+                headRow.appendChild(th);
+            });
+            thead.appendChild(headRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            vertices.forEach(rowV => {
+                const tr = document.createElement('tr');
+                tr.dataset.vertex = String(rowV);
+                const th = document.createElement('th');
+                th.textContent = rowV;
+                tr.appendChild(th);
+                vertices.forEach(colV => {
+                    const td = document.createElement('td');
+                    td.dataset.rowIndex = String(rowV);
+                    td.dataset.colIndex = String(colV);
+                    td.textContent = adj[rowV].includes(colV) ? '1' : '0';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            // Build SVG graph
+            const ns = 'http://www.w3.org/2000/svg';
+            const width = 620;
+            const height = 200;
+            svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+            const positions = {};
+            vertices.forEach((v, idx) => {
+                const x = 40 + idx * ((width - 80) / (vertices.length - 1));
+                const y = height / 2;
+                positions[v] = { x, y };
+            });
+
+            // edges
+            const edgeMap = {};
+            edges.forEach(([u, v]) => {
+                const line = document.createElementNS(ns, 'line');
+                const p1 = positions[u];
+                const p2 = positions[v];
+                line.setAttribute('x1', p1.x);
+                line.setAttribute('y1', p1.y);
+                line.setAttribute('x2', p2.x);
+                line.setAttribute('y2', p2.y);
+                line.setAttribute('class', 'vertex-edge');
+                const key1 = u + '-' + v;
+                const key2 = v + '-' + u;
+                edgeMap[key1] = line;
+                edgeMap[key2] = line;
+                svg.appendChild(line);
+            });
+
+            // nodes
+            const nodeMap = {};
+            vertices.forEach(v => {
+                const g = document.createElementNS(ns, 'g');
+                g.setAttribute('class', 'vertex-node');
+                g.setAttribute('data-vertex-node', String(v));
+                const circle = document.createElementNS(ns, 'circle');
+                circle.setAttribute('cx', positions[v].x);
+                circle.setAttribute('cy', positions[v].y);
+                circle.setAttribute('r', 16);
+                circle.setAttribute('class', 'node-circle');
+                const text = document.createElementNS(ns, 'text');
+                text.setAttribute('x', positions[v].x);
+                text.setAttribute('y', positions[v].y + 4);
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = v;
+                g.appendChild(circle);
+                g.appendChild(text);
+                svg.appendChild(g);
+                nodeMap[v] = g;
+            });
+
+            let events = [];
+            let stepIndex = 0;
+            let stack = [];
+            let visited = new Set();
+            let visitOrder = [];
+
+            function buildEvents(start) {
+                const log = [];
+                const seen = new Set();
+                function dfs(u) {
+                    log.push({ type: 'call', vertex: u });
+                    if (seen.has(u)) {
+                        log.push({ type: 'return', vertex: u, already: true });
+                        return;
+                    }
+                    seen.add(u);
+                    log.push({ type: 'visit', vertex: u });
+                    const neighbours = adj[u].slice().sort((a, b) => a - b);
+                    neighbours.forEach(v => dfs(v));
+                    log.push({ type: 'return', vertex: u });
+                }
+                dfs(start);
+                return log;
+            }
+
+            function resetState() {
+                stack = [];
+                visited = new Set();
+                visitOrder = [];
+                stackList.innerHTML = '<li>(empty)</li>';
+                visitedList.innerHTML = '<li class="small muted">(none)</li>';
+                orderEl.textContent = '(visit order will appear here)';
+                orderEl.classList.add('muted');
+                connectedEl.textContent = '(run DFS to check connectivity)';
+                connectedEl.classList.add('muted');
+                Object.values(nodeMap).forEach(n => {
+                    n.classList.remove('visited', 'current');
+                });
+                Object.values(edgeMap).forEach(e => {
+                    e.classList.remove('tree-edge');
+                });
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    tr.classList.remove('current-row');
+                });
+                nextBtn.disabled = true;
+                nextBtn.textContent = 'Next step';
+            }
+
+            function renderStack() {
+                stackList.innerHTML = '';
+                if (!stack.length) {
+                    const li = document.createElement('li');
+                    li.textContent = '(empty)';
+                    stackList.appendChild(li);
+                    return;
+                }
+                stack.forEach((v, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = String(v);
+                    if (idx === stack.length - 1) li.classList.add('stack-top');
+                    stackList.appendChild(li);
+                });
+            }
+
+            function renderVisited() {
+                visitedList.innerHTML = '';
+                if (!visited.size) {
+                    const li = document.createElement('li');
+                    li.textContent = '(none)';
+                    li.classList.add('small', 'muted');
+                    visitedList.appendChild(li);
+                    return;
+                }
+                Array.from(visited).forEach(v => {
+                    const li = document.createElement('li');
+                    li.classList.add('tag', 'visited');
+                    li.textContent = v;
+                    visitedList.appendChild(li);
+                });
+            }
+
+            function renderOrder() {
+                if (!visitOrder.length) {
+                    orderEl.textContent = '(visit order will appear here)';
+                    orderEl.classList.add('muted');
+                } else {
+                    orderEl.classList.remove('muted');
+                    orderEl.textContent = visitOrder.join(' → ');
+                }
+            }
+
+            function setCurrentVertex(v) {
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    tr.classList.toggle('current-row', tr.dataset.vertex === String(v));
+                });
+                Object.entries(nodeMap).forEach(([id, g]) => {
+                    if (String(id) === String(v)) g.classList.add('current');
+                    else g.classList.remove('current');
+                });
+            }
+
+            function handleEvent(ev) {
+                if (ev.type === 'call') {
+                    stack.push(ev.vertex);
+                    setCurrentVertex(ev.vertex);
+                } else if (ev.type === 'visit') {
+                    if (!visited.has(ev.vertex)) {
+                        visited.add(ev.vertex);
+                        visitOrder.push(ev.vertex);
+                        const n = nodeMap[ev.vertex];
+                        if (n) n.classList.add('visited');
+                        if (stack.length >= 2) {
+                            const parent = stack[stack.length - 2];
+                            const edge = edgeMap[parent + '-' + ev.vertex];
+                            if (edge) edge.classList.add('tree-edge');
+                        }
+                    }
+                } else if (ev.type === 'return') {
+                    stack.pop();
+                    const top = stack[stack.length - 1];
+                    if (top) setCurrentVertex(top);
+                }
+                renderStack();
+                renderVisited();
+                renderOrder();
+            }
+
+            function finalizeConnectivity() {
+                const count = visited.size;
+                if (count === vertices.length) {
+                    connectedEl.textContent = 'All vertices were visited. The graph is connected from this start vertex.';
+                } else {
+                    connectedEl.textContent = 'Only ' + count + ' out of ' + vertices.length +
+                        ' vertices were visited. The graph is not connected from this start vertex.';
+                }
+                connectedEl.classList.remove('muted');
+            }
+
+            runBtn.addEventListener('click', () => {
+                const start = parseInt(startSelect.value, 10) || 4;
+                resetState();
+                events = buildEvents(start);
+                stepIndex = 0;
+                if (events.length) {
+                    nextBtn.disabled = false;
+                    handleEvent(events[stepIndex++]);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (stepIndex >= events.length) {
+                    nextBtn.disabled = true;
+                    nextBtn.textContent = 'Done';
+                    finalizeConnectivity();
+                    return;
+                }
+                handleEvent(events[stepIndex++]);
+                if (stepIndex >= events.length) {
+                    nextBtn.textContent = 'Done';
+                    finalizeConnectivity();
+                }
+            });
+        }
+
+        // ---------- SECTION 6 – MENTOR GRAPH ----------
+        const mentorMarks = {
+            A: { M: 69, P: 75, C: 76 },
+            B: { M: 59, P: 87, C: 57 },
+            C: { M: 82, P: 53, C: 50 },
+            D: { M: 41, P: 60, C: 79 },
+            E: { M: 64, P: 75, C: 85 },
+            F: { M: 40, P: 88, C: 49 },
+            G: { M: 68, P: 77, C: 78 },
+            H: { M: 69, P: 58, C: 62 }
+        };
+
+        function computeMentorEdges() {
+            const subjects = ['M', 'P', 'C'];
+            const edges = { M: [], P: [], C: [] };
+            const students = Object.keys(mentorMarks);
+            students.forEach(x => {
+                students.forEach(y => {
+                    if (x === y) return;
+                    subjects.forEach(S => {
+                        const diff = mentorMarks[x][S] - mentorMarks[y][S];
+                        if (diff >= 10 && diff <= 20) {
+                            edges[S].push({ from: x, to: y, diff });
+                        }
+                    });
+                });
+            });
+            return edges;
+        }
+
+        function findMPCycles(start, edges) {
+            const cycles = [];
+            const path = [start];
+
+            function explore(current, length, subjectSeq) {
+                if (length === 3) {
+                    if (current === start && subjectSeq === 'MPC') {
+                        cycles.push(path.slice());
+                    }
+                    return;
+                }
+                let nextSubject;
+                if (length === 0) nextSubject = 'M';
+                else if (length === 1) nextSubject = 'P';
+                else nextSubject = 'C';
+
+                const list = edges[nextSubject].filter(e => e.from === current);
+                list.forEach(e => {
+                    path.push(e.to);
+                    explore(e.to, length + 1, subjectSeq + nextSubject);
+                    path.pop();
+                });
+            }
+
+            explore(start, 0, '');
+            return cycles;
+        }
+
+        function initMentorGraph() {
+            const showEdgesBtn = document.getElementById('mentor-show-edges');
+            const edgesContent = document.getElementById('mentor-edges-content');
+            const startSelect = document.getElementById('mentor-start');
+            const findBtn = document.getElementById('mentor-find-cycles');
+            const cyclesList = document.getElementById('mentor-cycles-output');
+
+            if (!showEdgesBtn || !findBtn) return;
+
+            const edges = computeMentorEdges();
+
+            showEdgesBtn.addEventListener('click', () => {
+                edgesContent.innerHTML = '';
+                const subjectsOrder = ['M', 'P', 'C'];
+                const subjectNames = { M: 'Maths', P: 'Physics', C: 'Chemistry' };
+                subjectsOrder.forEach(S => {
+                    const h = document.createElement('h4');
+                    h.textContent = subjectNames[S] + ' edges (mentor → mentee)';
+                    edgesContent.appendChild(h);
+                    const ul = document.createElement('ul');
+                    ul.classList.add('stack-list');
+                    if (!edges[S].length) {
+                        const li = document.createElement('li');
+                        li.textContent = '(none)';
+                        li.classList.add('small', 'muted');
+                        ul.appendChild(li);
+                    } else {
+                        edges[S].forEach(e => {
+                            const li = document.createElement('li');
+                            li.textContent = e.from + ' → ' + e.to;
+                            ul.appendChild(li);
+                        });
+                    }
+                    edgesContent.appendChild(ul);
+                });
+            });
+
+            findBtn.addEventListener('click', () => {
+                const start = startSelect.value || 'A';
+                const cycles = findMPCycles(start, edges);
+                cyclesList.innerHTML = '';
+                if (!cycles.length) {
+                    const li = document.createElement('li');
+                    li.textContent = 'No M→P→C cycles found starting at ' + start + '.';
+                    cyclesList.appendChild(li);
+                } else {
+                    cycles.forEach((cycle, idx) => {
+                        const li = document.createElement('li');
+                        const [x, y, z, back] = cycle;
+                        li.textContent = 'Cycle ' + (idx + 1) + ': ' +
+                            x + ' → ' + y + ' → ' + z + ' → ' + back;
+                        cyclesList.appendChild(li);
+                    });
+                }
+            });
+        }
+
+        // ---------- FINAL QUIZ ----------
+        function checkFinalQuiz() {
+            const questions = document.querySelectorAll('.mcq-question[data-mcq-kind="final"]');
+            let score = 0;
+            questions.forEach(q => {
+                const correct = q.dataset.correctOption;
+                const selected = q.querySelector('input[type="radio"]:checked');
+                q.classList.remove('mcq-correct', 'mcq-incorrect');
+                if (selected && selected.value === correct) {
+                    score++;
+                    q.classList.add('mcq-correct');
+                } else {
+                    q.classList.add('mcq-incorrect');
+                }
+            });
+            const feedbackEl = document.getElementById('final-quiz-feedback');
+            if (feedbackEl) {
+                let message = '';
+                if (score === 6) {
+                    message = '🔥 DFS & recursion wizard! Week 11 concepts are solid.';
+                } else if (score >= 4) {
+                    message = '✅ Good work! Revisit any section where you missed a question and try again.';
+                } else {
+                    message = 'No stress. Scroll back up, play with the DFS and recursion visualisers again, then retry the quiz.';
+                }
+                feedbackEl.textContent = 'You scored ' + score + '/6. ' + message;
+            }
+            updateProgress();
+        }
+
+        // ---------- INIT ----------
+        // ---------- INIT ----------
+        function initAll() {
+            // Checkboxes update progress
+            document.querySelectorAll('[data-progress-type="check"]').forEach(cb => {
+                cb.addEventListener('change', updateProgress);
+            });
+
+            initInstantMCQs();
+            initDFSStations();
+            initMutualDFS();
+            initFactorialVisualizer();
+            initListSumVisualizer();
+            initGenericDFS();
+            initMentorGraph();
+
+            const finalQuizBtn = document.getElementById('final-quiz-submit');
+            if (finalQuizBtn) {
+                finalQuizBtn.addEventListener('click', checkFinalQuiz);
+            }
+
+            updateProgress();
+        }
+
+        // Run immediately since we are injecting this content
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAll);
+        } else {
+            initAll();
+        }
+    </script>
+    </main>
+
+    <script>
+        // --- THEME MANAGER ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        function initTheme() {
+            const stored = localStorage.getItem('theme');
+            if (stored) {
+                html.setAttribute('data-theme', stored);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                html.setAttribute('data-theme', 'dark');
+            }
+            updateIcon();
+        }
+
+        function toggleTheme() {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateIcon();
+        }
+
+        function updateIcon() {
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            themeToggle.innerHTML = isDark
+                ? '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>'
+                : '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>';
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+        initTheme();
+
+        // --- ANIMATION OBSERVER ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.section').forEach(sec => observer.observe(sec));
+
+        // --- PROGRESS TRACKER ---
+        function updateProgress() {
+            // Simple progress based on scroll for now, or could be based on interactions
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("global-progress").style.width = scrolled + "%";
+            document.getElementById("progress-label").innerText = Math.round(scrolled) + "%";
+        }
+        window.onscroll = updateProgress;
+
+        // --- PLAYGROUND LOGIC ---
+        const pgInput = document.getElementById('playground-input');
+        const pgBuild = document.getElementById('playground-build');
+        const pgRun = document.getElementById('playground-run');
+        const pgSvg = document.getElementById('playground-svg');
+        const pgLog = document.getElementById('playground-log');
+
+        pgBuild.addEventListener('click', () => {
+            try {
+                const graph = JSON.parse(pgInput.value);
+                renderGraph(graph, pgSvg);
+                pgLog.innerHTML = '<div style="color:var(--success-color)">Graph built successfully!</div>';
+            } catch (e) {
+                pgLog.innerHTML = `<div style="color:var(--danger-color)">Error: ${e.message}</div>`;
+            }
+        });
+
+        pgRun.addEventListener('click', async () => {
+            try {
+                const graph = JSON.parse(pgInput.value);
+                const startNode = Object.keys(graph)[0];
+                if (!startNode) throw new Error("Graph is empty");
+
+                pgLog.innerHTML = '<div>Starting DFS...</div>';
+                await runDFS(graph, startNode, pgSvg, pgLog);
+                pgLog.innerHTML += '<div style="color:var(--success-color)">DFS Complete!</div>';
+            } catch (e) {
+                pgLog.innerHTML = `<div style="color:var(--danger-color)">Error: ${e.message}</div>`;
+            }
+        });
+
+        function renderGraph(graph, svg) {
+            svg.innerHTML = '';
+            const nodes = Object.keys(graph);
+            const radius = 120;
+            const centerX = 200;
+            const centerY = 150;
+            const positions = {};
+
+            // Calculate positions (circle layout)
+            nodes.forEach((node, i) => {
+                const angle = (i / nodes.length) * 2 * Math.PI;
+                positions[node] = {
+                    x: centerX + radius * Math.cos(angle),
+                    y: centerY + radius * Math.sin(angle)
+                };
+            });
+
+            // Draw edges
+            nodes.forEach(source => {
+                (graph[source] || []).forEach(target => {
+                    if (positions[target]) {
+                        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                        line.setAttribute("x1", positions[source].x);
+                        line.setAttribute("y1", positions[source].y);
+                        line.setAttribute("x2", positions[target].x);
+                        line.setAttribute("y2", positions[target].y);
+                        line.setAttribute("stroke", "var(--border-color)");
+                        line.setAttribute("stroke-width", "2");
+                        svg.appendChild(line);
+                    }
+                });
+            });
+
+            // Draw nodes
+            nodes.forEach(node => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "station-node");
+                g.setAttribute("id", `node-${node}`);
+
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", positions[node].x);
+                circle.setAttribute("cy", positions[node].y);
+                circle.setAttribute("r", "15");
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", positions[node].x);
+                text.setAttribute("y", positions[node].y);
+                text.setAttribute("dy", "4");
+                text.setAttribute("text-anchor", "middle");
+                text.textContent = node;
+
+                g.appendChild(circle);
+                g.appendChild(text);
+                svg.appendChild(g);
+            });
+        }
+
+        async function runDFS(graph, start, svg, log) {
+            const visited = new Set();
+            const stack = [start];
+
+            const highlight = async (line) => {
+                document.querySelectorAll('#playground-code div').forEach(d => d.style.background = 'transparent');
+                const el = document.getElementById('line-' + line);
+                if (el) el.style.background = 'rgba(99, 102, 241, 0.2)';
+                await new Promise(r => setTimeout(r, 400));
+            };
+
+            await highlight(1);
+            await highlight(2);
+
+            while (stack.length > 0) {
+                await highlight(3);
+                const curr = stack.pop();
+                await highlight(4);
+
+                if (!visited.has(curr)) {
+                    await highlight(5);
+                    visited.add(curr);
+                    log.innerHTML += `<div>Visited ${curr}</div>`;
+                    await highlight(6);
+
+                    // Highlight node
+                    const nodeEl = svg.querySelector(`#node-${curr}`);
+                    if (nodeEl) {
+                        nodeEl.classList.add('current');
+                        await new Promise(r => setTimeout(r, 400));
+                        nodeEl.classList.remove('current');
+                        nodeEl.classList.add('visited');
+                    }
+
+                    // Add neighbors
+                    await highlight(7);
+                    const neighbors = (graph[curr] || []).slice().reverse();
+                    for (const n of neighbors) {
+                        stack.push(n);
+                        await highlight(8);
+                    }
+                }
+            }
+            document.querySelectorAll('#playground-code div').forEach(d => d.style.background = 'transparent');
+        }
+
+        // --- INITIAL RENDER FOR PLAYGROUND ---
+        pgBuild.click();
+
+    </script>
 </body>
+
 </html>

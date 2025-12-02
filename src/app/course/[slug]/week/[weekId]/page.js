@@ -30,6 +30,24 @@ export default function WeekPage({ params }) {
     loadContent();
   }, [params.slug, params.weekId]);
 
+  // Execute scripts from the injected HTML
+  useEffect(() => {
+    if (!htmlContent) return;
+
+    const container = document.getElementById('week-content-container');
+    if (!container) return;
+
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach((oldScript) => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+  }, [htmlContent]);
+
   if (loading) {
     return (
       <div className="container section" style={{ position: 'relative', zIndex: 1 }}>
@@ -92,7 +110,7 @@ export default function WeekPage({ params }) {
           ← Back to Course
         </Link>
         <div className="content-wrapper">
-          <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          <div id="week-content-container" dangerouslySetInnerHTML={{ __html: htmlContent }} />
         </div>
       </div>
       <style jsx>{`
